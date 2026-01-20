@@ -221,7 +221,193 @@
         "pace": "보통"
       },
       "modified_at": "2026-01-20T14:13:08.618774"
+    },
+    {
+      "id": "plan_20260120_143529",
+      "created_at": "2026-01-20T14:35:29.380803",
+      "destination": "서울",
+      "start_date": "2023-11-02",
+      "end_date": "2023-11-02",
+      "activities": [
+        {
+          "name": "경복궁 방문",
+          "location": "경복궁",
+          "latitude": 37.5796,
+          "longitude": 126.977,
+          "time": "09:00",
+          "description": "조선 왕조의 대표 궁궐인 경복궁에서 역사 탐방",
+          "duration_minutes": 120,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "09:00",
+              "message": "경복궁 관람 시작 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5796,
+              "longitude": 126.977,
+              "radius": 0.3,
+              "message": "경복궁 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "명동 점심 식사",
+          "location": "명동",
+          "latitude": 37.5636,
+          "longitude": 126.9834,
+          "time": "12:00",
+          "description": "명동 대표 음식점에서 점심 식사 및 쇼핑",
+          "duration_minutes": 90,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "12:00",
+              "message": "명동에서 점심 식사 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5636,
+              "longitude": 126.9834,
+              "radius": 0.2,
+              "message": "명동 중심가에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "남산타워 전망대 방문",
+          "location": "남산타워",
+          "latitude": 37.5512,
+          "longitude": 126.9882,
+          "time": "14:00",
+          "description": "서울 시내 전경을 조망할 수 있는 남산타워 방문",
+          "duration_minutes": 100,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "14:00",
+              "message": "남산타워 관람 시작 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5512,
+              "longitude": 126.9882,
+              "radius": 0.25,
+              "message": "남산타워 근처에 도착했습니다"
+            },
+            {
+              "type": "weather",
+              "condition": "맑음",
+              "message": "날씨가 좋아 전망이 우수합니다"
+            }
+          ]
+        }
+      ],
+      "triggers": [],
+      "preferences": {
+        "interests": [
+          "문화",
+          "음식",
+          "전망"
+        ],
+        "pace": "보통"
+      },
+      "modified_at": "2026-01-20T14:35:29.380803"
+    },
+    {
+      "id": "plan_20260120_143702",
+      "created_at": "2026-01-20T14:37:02.187059",
+      "destination": "서울",
+      "start_date": "2023-11-04",
+      "end_date": "2023-11-04",
+      "activities": [
+        {
+          "name": "경복궁 관람",
+          "location": "경복궁",
+          "latitude": 37.5796,
+          "longitude": 126.977,
+          "time": "09:00",
+          "description": "조선 왕조의 정궁인 경복궁에서 역사와 전통 건축 감상",
+          "duration_minutes": 120,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "09:00",
+              "message": "경복궁 관람 시작 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5796,
+              "longitude": 126.977,
+              "radius": 0.3,
+              "message": "경복궁 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "명동 점심 식사",
+          "location": "명동",
+          "latitude": 37.5636,
+          "longitude": 126.9834,
+          "time": "12:00",
+          "description": "명동 관광거리에서 다양한 음식점에서 점심 식사",
+          "duration_minutes": 90,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "12:00",
+              "message": "명동에서 점심 식사 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5636,
+              "longitude": 126.9834,
+              "radius": 0.5,
+              "message": "명동 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "남산타워 전망대 방문",
+          "location": "남산타워",
+          "latitude": 37.5512,
+          "longitude": 126.9882,
+          "time": "14:30",
+          "description": "남산 정상에서 서울 시내 전망 감상 및 사진 촬영",
+          "duration_minutes": 90,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "14:30",
+              "message": "남산타워 방문 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5512,
+              "longitude": 126.9882,
+              "radius": 0.4,
+              "message": "남산타워 근처에 도착했습니다"
+            },
+            {
+              "type": "weather",
+              "condition": "맑음",
+              "message": "날씨가 좋아 전망이 선명합니다"
+            }
+          ]
+        }
+      ],
+      "triggers": [],
+      "preferences": {
+        "interests": [
+          "문화",
+          "음식",
+          "전망"
+        ],
+        "pace": "보통"
+      },
+      "modified_at": "2026-01-20T14:37:02.187059"
     }
   ],
-  "current_plan_id": "plan_20260120_141308"
+  "current_plan_id": "plan_20260120_143702"
 }
