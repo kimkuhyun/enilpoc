@@ -1,169 +1,197 @@
-# Enilpoc - AI Travel Planner & Guide
+# Enilpoc - AI 여행 플래너 & 가이드
 
-An intelligent travel planning assistant powered by LLM and RAG (Retrieval-Augmented Generation) concepts, designed to provide context-aware recommendations and personalized travel guidance.
+LLM과 RAG(검색 증강 생성) 개념을 활용한 지능형 여행 계획 도우미로, 상황 인지형 추천과 개인화된 여행 가이드를 제공합니다.
 
-## Overview
+## 개요
 
-Enilpoc is an MVP travel planner that goes beyond simple information retrieval by:
+Enilpoc은 단순한 정보 검색을 넘어서는 MVP 여행 플래너입니다:
 
-- **Understanding Context**: Analyzes weather, time, and location to provide situational recommendations
-- **Proactive Assistance**: Identifies missing information and suggests what would be helpful
-- **Evidence-Based Recommendations**: Supports suggestions with simulated review data and reasoning
-- **Natural Conversation**: Maintains context throughout the planning process
+- **상황 인지**: 날씨, 시간, 위치를 분석하여 상황에 맞는 추천 제공
+- **능동적 지원**: 필요한 정보를 파악하고 제안
+- **근거 기반 추천**: 시뮬레이션된 리뷰 데이터와 논리적 근거로 추천 설명
+- **자연스러운 대화**: 대화 전체의 맥락 유지
 
-## Features
+## 주요 기능
 
-### 1. Travel Planning Assistant
-- Natural language trip planning
-- Considers purpose, companions, duration, and preferences
-- Generates personalized itineraries
+### 1. 여행 계획 도우미
+- 자연어 기반 여행 일정 작성
+- 목적, 동행자, 기간, 선호도 고려
+- 개인화된 일정 생성
 
-### 2. Context-Aware Guide
-- Real-time weather integration (simulated in MVP)
-- Location-based recommendations
-- Time-of-day appropriate suggestions
+### 2. 상황 인지형 가이드
+- 실시간 날씨 연동 (MVP에서는 시뮬레이션)
+- 위치 기반 추천
+- 시간대별 적절한 제안
 
-### 3. Intelligent Recommendations
-- Analyzes planned activities against current conditions
-- Suggests alternatives when plans aren't suitable
-- Explains reasoning behind recommendations
+### 3. 지능형 추천
+- 현재 상황과 계획한 활동 분석
+- 조건이 맞지 않을 때 대안 제시
+- 추천 이유 명확하게 설명
 
-## Tech Stack
+## 기술 스택
 
-- **Frontend**: Streamlit
-- **LLM Integration**: OpenAI / Anthropic APIs
-- **Language**: Python 3.8+
-- **Configuration**: python-dotenv
+- **프론트엔드**: Streamlit
+- **LLM 연동**: OpenAI / Anthropic / Upstage APIs
+- **언어**: Python 3.8+
+- **설정**: python-dotenv
 
-## Installation
+## 설치 방법
 
-### 1. Clone the repository
+### 1. 레포지토리 클론
 
 ```bash
 git clone https://github.com/kimkuhyun/enilpoc.git
 cd enilpoc
 ```
 
-### 2. Create virtual environment
+### 2. 가상환경 생성 및 활성화
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
-### 3. Install dependencies
+### 3. 의존성 설치
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure API keys
+### 4. API 키 설정
 
-Copy `.env.example` to `.env` and add your API keys:
+`.env.example`을 `.env`로 복사하고 API 키를 입력하세요:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and add your credentials:
+`.env` 파일을 열어서 인증 정보를 입력:
 
 ```env
 OPENAI_API_KEY=your_key_here
-# OR
+# 또는
 ANTHROPIC_API_KEY=your_key_here
+# 또는
+UPSTAGE_API_KEY=your_key_here
 
-LLM_PROVIDER=openai  # or anthropic
-LLM_MODEL=gpt-4o-mini
+LLM_PROVIDER=openai  # openai, anthropic, upstage 중 선택
+LLM_MODEL=gpt-4o-mini  # 또는 claude-sonnet-4.5, solar-mini
 ```
 
-### 5. Run the application
+### 5. 애플리케이션 실행
 
 ```bash
 streamlit run app.py
 ```
 
-The app will open in your browser at `http://localhost:8501`
+앱이 브라우저에서 `http://localhost:8501`로 열립니다
 
-## Project Structure
+## 프로젝트 구조
 
 ```
 enilpoc/
-├── app.py                 # Main Streamlit application
+├── app.py                 # 메인 Streamlit 애플리케이션
 ├── agent/
 │   ├── __init__.py
-│   ├── travel_agent.py    # Core agent logic
-│   └── tools.py           # Agent tools (weather, reviews, etc.)
+│   ├── travel_agent.py    # AI 에이전트 핵심 로직
+│   └── tools.py           # 에이전트 도구 (날씨, 리뷰 등)
 ├── utils/
 │   ├── __init__.py
-│   ├── config.py          # Configuration management
-│   └── prompts.py         # LLM prompt templates
+│   ├── config.py          # 설정 관리
+│   └── prompts.py         # LLM 프롬프트 템플릿
 ├── .streamlit/
-│   └── config.toml        # Streamlit theme configuration
-├── .env.example           # Environment variables template
-├── requirements.txt       # Python dependencies
+│   └── config.toml        # Streamlit 테마 설정
+├── .env.example           # 환경 변수 템플릿
+├── requirements.txt       # Python 의존성
 └── README.md
 ```
 
-## Usage Examples
+## 사용 예시
 
-### Planning a Trip
-
-```
-User: I want to visit Seoul for 3 days
-Assistant: Great! To help you plan the perfect trip, could you tell me:
-- When are you planning to visit?
-- Will you be traveling solo or with companions?
-- What are your main interests? (culture, food, nature, etc.)
-```
-
-### Getting Recommendations
+### 여행 계획하기
 
 ```
-User: What should I do today?
-Assistant: [Checks current weather and time]
-Given that it's currently rainy and afternoon, I'd recommend:
-- Visiting the National Museum (1.2km away) - Reviews mention it's 
-  perfect for rainy days and less crowded on weekday afternoons
-- Cozy Corner Cafe (500m away) - Great atmosphere for solo travelers
+사용자: 서울에 3일 동안 여행 가려고 해요
+봇: 좋아요! 완벽한 여행을 계획하기 위해 몇 가지 알려주세요:
+- 언제 방문하실 계획인가요?
+- 혼자 여행하시나요, 아니면 동행자가 있나요?
+- 주요 관심사가 무엇인가요? (문화, 음식, 자연 등)
 ```
 
-## MVP Limitations
+### 추천 받기
 
-This is a 2-week MVP demo with simulated data:
+```
+사용자: 오늘 뭐 할까요?
+봇: [현재 날씨와 시간 확인]
+현재 비가 오고 오후라서 다음을 추천드려요:
+- 국립박물관 (1.2km 거리) - 리뷰에 따르면 비 오는 날 
+  완벽하고 평일 오후는 덜 붐빕니다
+- 아늑한 카페 (500m 거리) - 혼자 여행하기 좋은 분위기
+```
 
-- Weather data is randomly generated (not real API)
-- Reviews are from a mock database (not real RAG)
-- Location services are simulated
-- No actual database or persistence
+## MVP 제한사항
 
-## Configuration
+이것은 2주 MVP 데모이며 시뮬레이션 데이터를 사용합니다:
 
-### Environment Variables
+- 날씨 데이터는 랜덤 생성 (실제 API 아님)
+- 리뷰는 목 데이터베이스 사용 (실제 RAG 아님)
+- 위치 서비스 시뮬레이션
+- 데이터베이스 없음 (영구 저장 없음)
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENAI_API_KEY` | OpenAI API key | Yes (if using OpenAI) |
-| `ANTHROPIC_API_KEY` | Anthropic API key | Yes (if using Anthropic) |
-| `LLM_PROVIDER` | LLM provider (`openai` or `anthropic`) | Yes |
-| `LLM_MODEL` | Model name | No (default: gpt-4o-mini) |
-| `LLM_TEMPERATURE` | Temperature for responses | No (default: 0.7) |
-| `MAX_TOKENS` | Maximum tokens per response | No (default: 2000) |
+## 설정
 
-### Theme Colors
+### 환경 변수
 
-The application uses a custom color palette:
+| 변수 | 설명 | 필수 여부 |
+|------|------|-----------|
+| `OPENAI_API_KEY` | OpenAI API 키 | OpenAI 사용 시 필수 |
+| `ANTHROPIC_API_KEY` | Anthropic API 키 | Anthropic 사용 시 필수 |
+| `UPSTAGE_API_KEY` | Upstage API 키 | Upstage 사용 시 필수 |
+| `LLM_PROVIDER` | LLM 제공자 (`openai`, `anthropic`, `upstage`) | 필수 |
+| `LLM_MODEL` | 모델 이름 | 선택 (기본값: gpt-4o-mini) |
+| `LLM_TEMPERATURE` | 응답 온도 | 선택 (기본값: 0.7) |
+| `MAX_TOKENS` | 응답 최대 토큰 | 선택 (기본값: 2000) |
 
-- Primary: `#A8DF8E` (soft green)
-- Background: `#F0FFDF` (light green)
-- Secondary Background: `#FFD8DF` (light pink)
-- Accent: `#FFAAB8` (soft pink)
+### 테마 색상
 
-## Contact
+애플리케이션은 커스텀 색상 팔레트를 사용합니다:
 
-Project Link: [https://github.com/kimkuhyun/enilpoc](https://github.com/kimkuhyun/enilpoc)
+- 주 색상: `#A8DF8E` (연한 녹색)
+- 배경: `#F0FFDF` (밝은 녹색)
+- 보조 배경: `#FFD8DF` (연한 분홍)
+- 강조: `#FFAAB8` (부드러운 분홍)
 
-## Acknowledgments
+## 프로덕션 로드맵
 
-- Streamlit for the amazing framework
-- OpenAI / Anthropic for LLM APIs
-- Color palette from [ColorHunt](https://colorhunt.co/palette/a8df8ef0ffdfffd8dfffaab8)
+- [ ] 실제 날씨 API 연동 (OpenWeatherMap 등)
+- [ ] 리뷰 RAG용 벡터 데이터베이스 (Pinecone, Weaviate)
+- [ ] 실제 위치 서비스 (Google Places API)
+- [ ] 사용자 인증 및 여행 저장
+- [ ] 다국어 지원
+- [ ] 모바일 최적화 UI
+- [ ] 예약 서비스 연동
+
+## API 키 발급
+
+### OpenAI
+https://platform.openai.com/api-keys
+
+### Anthropic
+https://console.anthropic.com/
+
+### Upstage
+1. https://console.upstage.ai/ 접속
+2. 회원가입 후 로그인
+3. API Keys 메뉴 선택
+4. "Create New Key" 버튼 클릭
+5. 생성된 키 복사 및 안전하게 보관
+
+## 문의
+
+프로젝트 링크: [https://github.com/kimkuhyun/enilpoc](https://github.com/kimkuhyun/enilpoc)
+
+## 감사의 말
+
+- Streamlit 프레임워크
+- OpenAI / Anthropic / Upstage LLM API
+- [ColorHunt](https://colorhunt.co/palette/a8df8ef0ffdfffd8dfffaab8) 색상 팔레트
