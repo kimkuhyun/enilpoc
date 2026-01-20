@@ -1,4 +1,4 @@
-"""여행 시뮬레이터 - Upstage AI 전용 버전."""
+"""여행 시뮬레이터 - Upstage AI 전용 버전 (사용자 입력 필수)."""
 
 import streamlit as st
 from datetime import datetime, timedelta
@@ -52,7 +52,7 @@ if "current_activity_index" not in st.session_state:
     st.session_state.current_activity_index = 0
 
 if "character_thought" not in st.session_state:
-    st.session_state.character_thought = "여행 준비 중..."
+    st.session_state.character_thought = "여행 계획을 기다리는 중..."
 
 if "waiting_for_notification" not in st.session_state:
     st.session_state.waiting_for_notification = False
@@ -92,8 +92,8 @@ def create_phone_html_component(notifications, time_info, location):
         notif_html = '''
         <div style="padding: 50px 20px; text-align: center; color: #999;">
             <p style="font-size: 60px; margin: 0;">📱</p>
-            <p style="font-size: 18px; font-weight: 500; margin: 15px 0 5px;">알림이 없습니다</p>
-            <p style="font-size: 14px;">AI가 계획을 생성하고 알림을 보낼 예정입니다</p>
+            <p style="font-size: 18px; font-weight: 500; margin: 15px 0 5px;">알림 대기 중</p>
+            <p style="font-size: 14px;">여행 계획을 입력하면<br/>AI가 알림을 생성합니다</p>
         </div>
         '''
     
@@ -285,49 +285,56 @@ if not st.session_state.api_key_provided:
     
     st.stop()
 
-# 계획 생성
+# 계획 입력 (계획이 없으면 확장, 있으면 축소)
 with st.expander("📝 AI 여행 계획 생성", expanded=not bool(current_plan)):
     if current_plan:
         st.success(f"✅ AI 생성 계획: {current_plan.get('destination', '서울 하루 여행')}")
-        st.write(f"활동: {len(current_plan.get('activities', []))}개")
+        st.write(f"📍 활동: {len(current_plan.get('activities', []))}개")
         
         # 계획 상세 정보
-        with st.expander("계획 상세 보기"):
+        with st.expander("📋 계획 상세 보기"):
             for idx, act in enumerate(current_plan.get('activities', [])):
                 st.markdown(f"**{idx+1}. {act.get('name')}** ({act.get('time')})")
                 st.write(f"📍 {act.get('location')}")
                 st.write(f"⏱️ {act.get('duration_minutes', 60)}분")
                 if act.get('description'):
-                    st.caption(act.get('description'))
+                    st.caption(f"ℹ️ {act.get('description')}")
                 st.markdown("---")
         
-        if st.button("초기화", type="secondary"):
-            st.session_state.rag.plans = {"plans": [], "current_plan_id": None}
-            st.session_state.rag._save_plans()
-            st.session_state.movement_path = []
-            st.session_state.current_activity_index = 0
-            st.session_state.auto_playing = False
-            st.session_state.simulator.state["notifications"] = []
-            st.rerun()
+        col_reset1, col_reset2 = st.columns(2)
+        with col_reset1:
+            if st.button("🔄 계획 초기화", type="secondary", use_container_width=True):
+                st.session_state.rag.plans = {"plans": [], "current_plan_id": None}
+                st.session_state.rag._save_plans()
+                st.session_state.movement_path = []
+                st.session_state.current_activity_index = 0
+                st.session_state.auto_playing = False
+                st.session_state.simulator.state["notifications"] = []
+                st.session_state.character_thought = "여행 계획을 기다리는 중..."
+                st.rerun()
     else:
-        st.info("💡 Upstage Solar AI가 여행 계획을 자동 생성합니다")
+        # 계획이 없을 때 - 입력 필수!
+        st.warning("⚠️ 여행 계획이 없습니다. 아래에 계획을 입력하세요!")
+        
+        st.info("💡 **시뮬레이션 시작 방법**\n\n1️⃣ 아래 텍스트 영역에 여행 계획 입력\n2️⃣ AI가 자동으로 구조화된 계획 생성\n3️⃣ \"▶️ 자동 진행\" 버튼으로 시뮬레이션 시작")
         
         plan_input = st.text_area(
-            "여행 계획 입력",
-            height=100,
-            placeholder="예: 서울 하루 여행. 오전에 경복궁 관람하고, 점심은 북촌 한식당에서 먹고, 오후에는 인사동에서 쇼핑하고, 저녁은 명동 맛집에서 먹고 싶어요"
+            "여행 계획 입력 (필수)",
+            height=120,
+            placeholder="예: 서울 하루 여행. 오전에 경복궁 관람하고, 점심은 북촌 한식당에서 먹고, 오후에는 인사동에서 쇼핑하고, 저녁은 명동 맛집에서 먹고 싶어요",
+            help="구체적으로 입력할수록 AI가 더 정확한 계획을 생성합니다"
         )
         
-        if st.button("🤖 AI로 계획 생성", use_container_width=True, type="primary"):
+        if st.button("🤖 AI로 계획 생성", use_container_width=True, type="primary", disabled=not plan_input):
             if plan_input:
-                with st.spinner("🤖 Upstage Solar AI가 계획을 생성 중..."):
+                with st.spinner("🤖 Upstage Solar AI가 여행 계획을 생성하는 중..."):
                     try:
                         result = st.session_state.plan_generator.generate_structured_plan(plan_input)
                         
                         if "error" in result:
                             st.error(f"❌ 오류: {result['error']}")
                             if "raw_response" in result:
-                                with st.expander("AI 응답 보기"):
+                                with st.expander("🔍 AI 응답 보기"):
                                     st.code(result['raw_response'])
                         else:
                             st.success("✅ AI 계획 생성 완료!")
@@ -337,12 +344,16 @@ with st.expander("📝 AI 여행 계획 생성", expanded=not bool(current_plan)
                     except Exception as e:
                         st.error(f"❌ 오류: {str(e)}")
                         st.exception(e)
-            else:
-                st.warning("여행 계획을 입력하세요")
+
+# 계획이 없으면 여기서 멈춤
+if not current_plan:
+    st.markdown("---")
+    st.info("👆 먼저 위에서 여행 계획을 입력하고 AI로 생성하세요!")
+    st.stop()
 
 st.markdown("---")
 
-# 분할 레이아웃
+# 분할 레이아웃 (계획이 있을 때만 표시)
 col_left, col_right = st.columns([2, 1])
 
 current_state = st.session_state.simulator.get_state()
@@ -352,11 +363,11 @@ with col_left:
     
     # 말풍선
     if st.session_state.waiting_for_notification:
-        thought = "🔔 AI가 알림을 보냈어!"
+        thought = "🔔 AI가 알림을 보냈어! 확인해봐"
     elif st.session_state.auto_playing:
         thought = f"🚶 {st.session_state.character_thought}"
     else:
-        thought = "AI 계획으로 여행 시작! ✨"
+        thought = "AI 계획으로 여행 시작 준비 완료! ✨"
     
     st.info(thought)
     
@@ -374,7 +385,7 @@ with col_left:
     col_c1, col_c2, col_c3 = st.columns(3)
     
     with col_c1:
-        if st.button("▶️ 자동 진행", use_container_width=True, type="primary", disabled=st.session_state.auto_playing or not current_plan):
+        if st.button("▶️ 자동 진행", use_container_width=True, type="primary", disabled=st.session_state.auto_playing):
             if current_plan and current_plan.get("activities"):
                 st.session_state.auto_playing = True
                 st.session_state.current_activity_index = 0
@@ -408,6 +419,7 @@ with col_left:
             st.session_state.auto_playing = False
             st.session_state.waiting_for_notification = False
             st.session_state.current_step = 0
+            st.session_state.character_thought = "AI 계획 대기 중..."
             st.rerun()
 
 with col_right:
@@ -530,4 +542,4 @@ if st.session_state.auto_playing and not st.session_state.waiting_for_notificati
                 st.rerun()
 
 st.markdown("---")
-st.caption("🤖 Upstage Solar AI 여행 시뮬레이터 - 모든 계획과 알림이 AI에 의해 생성됩니다")
+st.caption("🤖 Upstage Solar AI - 사용자가 요청하면 AI가 계획/알림을 자동 생성합니다")
