@@ -39,7 +39,9 @@ st.markdown("""
         background: #f5f5f5;
         border-radius: 25px;
         overflow: hidden;
-        height: 100%;
+        min-height: 680px;
+        display: flex;
+        flex-direction: column;
     }
     
     /* 안드로이드 상태바 */
@@ -204,11 +206,11 @@ def create_pydeck_map(current_location, plan=None, path=[]):
         )
     )
     
-    # 지도 생성
+    # 지도 생성 (map_style=None으로 CORS 에러 방지)
     deck = pdk.Deck(
         layers=layers,
         initial_view_state=view_state,
-        map_style="mapbox://styles/mapbox/light-v10",
+        map_style=None,  # 기본 타일 사용 (CORS 에러 방지)
         tooltip={"text": "{name}"}
     )
     
@@ -464,10 +466,17 @@ with col_right:
     notifications = st.session_state.simulator.state["notifications"]
     unread = [n for n in notifications if not n.get("read", False)]
     
-    st.markdown(f"**알림 ({len(unread)} / {len(notifications)})**")
+    st.markdown(f"### 알림 ({len(unread)} / {len(notifications)})")
+    st.markdown("")
     
     if not notifications:
-        st.info("알림 없음")
+        st.markdown("""
+        <div style="padding: 20px; text-align: center; color: #666;">
+            <p style="font-size: 16px; margin-bottom: 10px;">📱</p>
+            <p>알림이 없습니다</p>
+            <p style="font-size: 12px; color: #999;">계획을 생성하고 자동 진행을 시작하세요</p>
+        </div>
+        """, unsafe_allow_html=True)
     else:
         for idx, notif in enumerate(reversed(notifications[-5:])):
             actual_idx = len(notifications) - 1 - idx
