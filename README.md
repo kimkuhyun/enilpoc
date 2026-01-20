@@ -1,33 +1,75 @@
 # 🤖 AI 여행 시뮬레이터 (Upstage Solar)
 
-**실시간 이동 애니메이션 + AI가 생성하는 여행 계획 & 알림**
+**사용자 입력 → AI 생성 → 실시간 시뮬레이션**
 
-Upstage Solar AI가 여행 계획을 생성하고, 트리거를 설정하고, 알림을 보내는 완전 자동화 시뮬레이터입니다.
+Upstage Solar AI가 사용자의 요청을 받아 여행 계획을 생성하고, 트리거를 설정하고, 알림을 보내는 완전 자동화 시뮬레이터입니다.
 
-## ✨ AI 기능
+## 🎯 핵심 플로우
 
-### 🤖 Upstage Solar AI가 하는 일
+```
+1️⃣ 사용자 입력
+   ↓
+   "서울 하루 여행. 경복궁, 북촌 한식당, 인사동..."
+   
+2️⃣ AI 생성 (5-10초)
+   ↓
+   {
+     "activities": [...],
+     "triggers": [...],
+     "messages": [...]
+   }
+   
+3️⃣ 시뮬레이션 시작
+   ↓
+   이동 → 도착 → AI 알림 → 확인 → 다음
+```
 
-1. **여행 계획 생성**
-   - 사용자 입력 → AI가 구조화된 JSON 계획 생성
-   - 관광명소, 음식점, 쇼핑 자동 포함
-   - 위도/경도, 시간, 소요시간 자동 설정
+## ✨ AI가 하는 일
 
-2. **트리거 생성**
-   - 위치 기반 트리거 (도착 시 알림)
-   - 시간 기반 트리거 (식사 시간 알림)
-   - 날씨 기반 트리거 (우산 준비 등)
+### 🤖 Upstage Solar AI의 역할
+
+1. **여행 계획 구조화**
+   ```
+   사용자: "서울 하루 여행. 경복궁, 점심, 인사동"
+   
+   AI 생성:
+   - 경복궁 관람 (09:00, 120분)
+     위치: 37.5796, 126.9770
+     설명: "조선 왕조의 정궁..."
+     
+   - 북촌 한식당 (12:00, 60분)
+     위치: 37.5826, 126.9830
+     설명: "전통 한옥에서..."
+     
+   - 인사동 쇼핑 (14:00, 120분)
+     위치: 37.5723, 126.9894
+     설명: "전통 공예품..."
+   ```
+
+2. **트리거 자동 생성**
+   ```json
+   {
+     "type": "location",
+     "latitude": 37.5796,
+     "longitude": 126.9770,
+     "radius": 0.5,
+     "message": "경복궁에 도착했습니다!"
+   }
+   ```
 
 3. **알림 메시지 생성**
-   - 각 활동에 맞는 AI 생성 메시지
-   - 예: "경복궁에 도착했습니다! 입장권은 온라인으로 예매하셨나요?"
+   - "경복궁에 도착했습니다! 입장권은 온라인으로 예매하셨나요?"
+   - "점심시간입니다. 북촌 한식당에서 전통 한식을 즐겨보세요!"
 
 ## 🚀 빠른 시작
 
 ### 1. Upstage API 키 발급
-1. [Upstage Console](https://console.upstage.ai) 접속
+```
+1. https://console.upstage.ai 접속
 2. 회원가입/로그인
-3. API 키 발급 (`up_...`로 시작)
+3. API 키 발급 (up_...로 시작)
+4. 복사 (나중에 사용)
+```
 
 ### 2. 프로젝트 설치
 ```bash
@@ -42,21 +84,327 @@ pip install -r requirements.txt
 streamlit run simulation_app.py
 ```
 
-### 4. API 키 입력
-- 브라우저에서 http://localhost:8501 접속
-- "Upstage API 키 설정" 섹션에 키 입력
-- "설정" 버튼 클릭
+### 4. 완전한 플로우
 
-### 5. AI로 계획 생성!
+#### Step 1: API 키 입력
 ```
-입력 예시:
-"서울 하루 여행. 오전에 경복궁 관람하고, 점심은 북촌 한식당에서 먹고, 
-오후에는 인사동에서 쇼핑하고, 저녁은 명동 맛집에서 먹고 싶어요"
+http://localhost:8501 접속
+→ "Upstage API 키" 입력 (up_...)
+→ "설정" 클릭
+→ ✅ 설정 완료!
+```
 
-↓ AI가 자동 생성 ↓
+#### Step 2: 여행 계획 입력 (필수!)
+```
+📝 AI 여행 계획 생성 (확장됨)
+
+⚠️ 여행 계획이 없습니다. 아래에 계획을 입력하세요!
+
+💡 시뮬레이션 시작 방법
+1️⃣ 아래 텍스트 영역에 여행 계획 입력
+2️⃣ AI가 자동으로 구조화된 계획 생성
+3️⃣ "▶️ 자동 진행" 버튼으로 시뮬레이션 시작
+
+[텍스트 영역]
+예: 서울 하루 여행. 오전에 경복궁 관람하고, 
+점심은 북촌 한식당에서 먹고, 오후에는 
+인사동에서 쇼핑하고, 저녁은 명동 맛집에서 
+먹고 싶어요
+
+[🤖 AI로 계획 생성]
+```
+
+#### Step 3: AI 생성 대기
+```
+🤖 Upstage Solar AI가 여행 계획을 생성하는 중...
+(5-10초 소요)
+
+✅ AI 계획 생성 완료!
+🎈 (풍선 애니메이션)
+```
+
+#### Step 4: 계획 확인
+```
+📝 AI 여행 계획 생성 (축소됨)
+✅ AI 생성 계획: 서울 하루 여행
+📍 활동: 3개
+
+[📋 계획 상세 보기] (클릭 가능)
+  1. 경복궁 관람 (09:00)
+     📍 경복궁
+     ⏱️ 120분
+     ℹ️ 조선 왕조의 정궁...
+  ---
+  2. 북촌 한식당 점심 (12:00)
+     ...
+```
+
+#### Step 5: 시뮬레이션 시작!
+```
+🗺️ 실시간 지도
+🚶 AI 계획으로 여행 시작 준비 완료! ✨
+
+[지도 표시]
+- 파란 원: 활동 지점 (3개)
+- 현재 위치: 서울역
+
+[▶️ 자동 진행] [⏸️ 정지] [🔄 초기화]
+
+→ "▶️ 자동 진행" 클릭!
+```
+
+#### Step 6: 자동 이동
+```
+🚶 경복궁 관람(으)로 이동 중...
+
+[지도]
+- 빨간 선: 이동 경로
+- 빨간 큰 원: 현재 위치 (움직임!)
+- 20단계 × 0.2초 = 4초 소요
+```
+
+#### Step 7: AI 알림
+```
+📱 안드로이드 화면
+
+🔔 AI 알림 (1/1)
+
+┌──────────────────┐
+│ 🆕 🤖 경복궁 관람 │
+│ 경복궁에 도착했습니다! │
+│ 입장권은 온라인으로   │
+│ 예매하셨나요?         │
+│ 🕐 09:00            │
+└──────────────────┘
+
+⚠️ AI 알림을 확인해주세요!
+🆕 **🤖 경복궁 관람**  [✅]
+```
+
+#### Step 8: 다음 활동
+```
+[✅] 클릭
+→ 알림 읽음 처리
+→ 자동으로 다음 활동 시작
+→ "북촌 한식당 점심(으)로 이동 중..."
+```
+
+## 📱 화면 구성
+
+```
+┌─────────────────────┬────────────────┐
+│ 🗺️ 실시간 지도       │ 📱 안드로이드   │
+│                     │                │
+│ 💭 말풍선           │ 📶⏰🔋         │
+│ 🚶 경복궁으로...    │                │
+│                     │ 🔔 AI 알림     │
+│ [pydeck 지도]       │                │
+│ • 파란 원: 활동     │ 🆕 경복궁 관람  │
+│ • 빨간 선: 경로     │ AI 생성 메시지  │
+│ • 빨간 원: 현재     │ 🕐 09:00       │
+│                     │                │
+│ [▶️] [⏸️] [🔄]    │ [✅ 확인]      │
+└─────────────────────┴────────────────┘
+```
+
+## 🎮 버튼 설명
+
+- **🤖 AI로 계획 생성**: 사용자 입력 → AI 생성
+- **▶️ 자동 진행**: 모든 활동 자동 실행
+- **⏸️ 정지**: 현재 위치에서 중단
+- **🔄 초기화**: 경로/알림 삭제 (계획 유지)
+- **🔄 계획 초기화**: 계획까지 완전 삭제
+- **✅ 확인**: 알림 읽음 → 다음 활동
+
+## 🔍 AI 작동 확인
+
+### 1. 계획이 AI에 의한 것인지 확인
+
+**방법 1: 계획 상세 보기**
+```
+📋 계획 상세 보기 (클릭)
+
+1. 경복궁 관람 (09:00)
+   📍 경복궁
+   ⏱️ 120분
+   ℹ️ 조선 왕조의 정궁인 경복궁에서 역사 탐방  ← AI 생성!
+```
+
+**방법 2: 다른 입력으로 테스트**
+```
+입력 1: "서울 하루 여행. 경복궁, 북촌, 인사동"
+→ AI 생성 A
+
+🔄 계획 초기화
+
+입력 2: "부산 하루 여행. 해운대, 자갈치시장, 광안리"
+→ AI 생성 B (완전히 다름!)
+```
+
+**방법 3: 알림 메시지 확인**
+```
+🤖 이모지가 있음 = AI가 생성한 알림
+🔔 일반 이모지 = 시스템 알림
+
+예: "🤖 경복궁 관람" ← AI 생성!
+```
+
+### 2. 트리거 확인
+
+```python
+# agent/plan_rag.py
+def check_triggers(current_location, current_time, current_weather):
+    """AI가 생성한 트리거 조건 체크"""
+    
+    triggered = []
+    for activity in plan["activities"]:
+        for trigger in activity.get("triggers", []):
+            if trigger["type"] == "location":
+                # 위치 기반 트리거
+                distance = calculate_distance(
+                    current_location,
+                    trigger["latitude"],
+                    trigger["longitude"]
+                )
+                if distance <= trigger["radius"]:
+                    triggered.append({
+                        "activity": activity,
+                        "trigger": trigger  # AI가 생성한 메시지!
+                    })
+    
+    return triggered
+```
+
+## 🐛 문제 해결
+
+### Q1: "여행 계획이 없습니다" 계속 나옴
+
+**원인**: 계획을 입력했지만 "AI로 계획 생성" 버튼을 안 눌렀음
+
+**해결**:
+```
+1. 텍스트 영역에 계획 입력
+2. "🤖 AI로 계획 생성" 버튼 클릭 ← 중요!
+3. 5-10초 대기
+4. ✅ 완료 확인
+```
+
+### Q2: API 키 오류
+
+**증상**:
+```
+❌ 오류: Error code: 401 - {'error': {'message': 'Incorrect API key provided: up_Z5GN...'}}
+```
+
+**해결**:
+```bash
+# .env 파일 직접 수정
+notepad .env
+
+# 올바른 형식:
+UPSTAGE_API_KEY=up_YOUR_REAL_KEY_HERE
+LLM_PROVIDER=upstage
+LLM_MODEL=solar-pro
+
+# 저장 후 앱 재시작
+```
+
+### Q3: 지도/핸드폰이 안 보임
+
+**원인**: 계획이 생성되지 않음
+
+**확인**:
+```
+📝 AI 여행 계획 생성 섹션 확인
+
+✅ 있어야 함:
+"✅ AI 생성 계획: 서울 하루 여행"
+"📍 활동: 3개"
+
+❌ 이렇게 나오면 안 됨:
+"⚠️ 여행 계획이 없습니다"
+```
+
+### Q4: 알림이 안 생김
+
+**확인 1**: 계획에 트리거가 있는지
+```
+📋 계획 상세 보기
+→ 각 활동 확인
+→ "트리거" 항목 확인
+```
+
+**확인 2**: 실제로 도착했는지
+```
+🗺️ 지도에서
+- 빨간 큰 원 (현재 위치)
+- 파란 원 (목표 지점)
+→ 겹쳐야 알림 생성!
+```
+
+## ⚙️ 고급 설정
+
+### AI 모델 변경
+
+```python
+# utils/config.py
+
+LLM_MODEL = "solar-pro"  # 기본 (추천)
+# LLM_MODEL = "solar-mini"  # 빠르지만 덜 정확
+```
+
+### 트리거 반경 조정
+
+```python
+# agent/plan_generator.py
 
 {
+  "type": "location",
+  "radius": 0.5  # km (기본)
+  # "radius": 0.3  # 더 정확하게
+  # "radius": 1.0  # 더 널널하게
+}
+```
+
+## 📊 파일 구조
+
+```
+enilpoc/
+├── simulation_app.py (546줄)
+│   ├── API 키 설정 UI
+│   ├── 계획 입력 UI (확장/축소)
+│   ├── 지도 + 핸드폰 (계획 있을 때만)
+│   └── 자동 진행 로직
+│
+├── agent/
+│   ├── plan_generator.py  # AI 계획 생성
+│   ├── plan_rag.py         # 트리거 관리
+│   └── simulator.py        # 위치/시간/알림
+│
+├── travel_plans.json (빈 상태)
+│   {
+│     "plans": [],
+│     "current_plan_id": null
+│   }
+│
+└── .env (사용자가 설정)
+    UPSTAGE_API_KEY=up_...
+```
+
+## 🎯 AI 생성 예시
+
+### 입력
+```
+서울 하루 여행. 아침에 경복궁 보고, 점심은 북촌 한옥마을에서 
+한식 먹고, 오후에는 인사동 구경하고, 저녁은 명동에서 쇼핑하고 싶어요
+```
+
+### AI 생성 (Upstage Solar)
+```json
+{
   "destination": "서울 하루 여행",
+  "start_date": "2026-01-20",
+  "end_date": "2026-01-20",
   "activities": [
     {
       "name": "경복궁 관람",
@@ -65,246 +413,53 @@ streamlit run simulation_app.py
       "longitude": 126.9770,
       "time": "09:00",
       "duration_minutes": 120,
+      "description": "조선 왕조의 정궁인 경복궁에서 역사 탐방. 광화문, 근정전, 경회루 등 주요 건축물 관람",
       "triggers": [
         {
           "type": "location",
+          "latitude": 37.5796,
+          "longitude": 126.9770,
+          "radius": 0.3,
           "message": "경복궁에 도착했습니다! 입장권은 온라인으로 예매하셨나요?"
+        },
+        {
+          "type": "time",
+          "time": "09:00",
+          "message": "경복궁 관람 시작 시간입니다"
+        }
+      ]
+    },
+    {
+      "name": "북촌 한옥마을 한식 점심",
+      "location": "북촌한옥마을 내 한식당",
+      "latitude": 37.5826,
+      "longitude": 126.9830,
+      "time": "12:00",
+      "duration_minutes": 60,
+      "description": "전통 한옥에서 즐기는 한정식 또는 비빔밥 등 한식 점심 식사",
+      "triggers": [
+        {
+          "type": "time",
+          "time": "12:00",
+          "message": "점심 식사 시간입니다. 북촌 한식당에서 전통 한식을 즐겨보세요!"
         }
       ]
     },
     ...
-  ]
-}
-```
-
-## 📱 화면 구성
-
-```
-┌────────────────────┬──────────────────┐
-│ 왼쪽 (지도)        │ 오른쪽 (핸드폰)   │
-│                    │                  │
-│ 🚶 AI 계획 실행 중 │ ⏰ 14:30         │
-│                    │ 📍 경복궁        │
-│ [지도]             │ 🔋 100%          │
-│ - 파란 원: 활동    │                  │
-│ - 빨간 선: 경로    │ 🔔 AI 알림       │
-│ - 빨간 큰 원: 현재 │                  │
-│                    │ ┌──────────────┐ │
-│                    │ │🤖 경복궁 관람 │ │
-│                    │ │AI 생성 메시지 │ │
-│ [▶️][⏸️][🔄]     │ │🕐 14:30      │ │
-│                    │ └──────────────┘ │
-└────────────────────┴──────────────────┘
-```
-
-## 🔧 기술 스택
-
-- **AI**: Upstage Solar API (solar-pro)
-- **Frontend**: Streamlit + HTML/CSS Components
-- **지도**: pydeck (Deck.gl)
-- **상태 관리**: Streamlit Session State
-
-## 📝 AI가 생성하는 것들
-
-### 1. 여행 계획 (plan_generator.py)
-```python
-def generate_structured_plan(user_input: str):
-    # Upstage Solar API 호출
-    response = client.chat.completions.create(
-        model="solar-pro",
-        messages=[...],
-        temperature=0.3
-    )
-    
-    # AI가 JSON 응답 생성
-    return {
-        "destination": "...",
-        "activities": [...],
-        "triggers": [...]
-    }
-```
-
-### 2. 트리거 (AI가 자동 설정)
-```json
-{
-  "type": "location",
-  "latitude": 37.5796,
-  "longitude": 126.9770,
-  "radius": 0.5,
-  "message": "경복궁에 도착했습니다!"
-}
-```
-
-### 3. 알림 메시지 (AI가 생성)
-- "경복궁에 도착했습니다! 입장권은 온라인으로 예매하셨나요?"
-- "점심시간입니다. 북촌 한식당에서 전통 한식을 즐겨보세요!"
-- "인사동 거리에 오신 것을 환영합니다!"
-
-## 🎮 사용 방법
-
-### 1단계: API 키 설정
-```
-1. streamlit run simulation_app.py
-2. API 키 입력 (up_...)
-3. "설정" 클릭
-```
-
-### 2단계: AI로 계획 생성
-```
-1. 여행 계획 입력
-2. "🤖 AI로 계획 생성" 클릭
-3. 5-10초 대기 (AI가 생성 중)
-4. 계획 확인
-```
-
-### 3단계: 자동 진행
-```
-1. "▶️ 자동 진행" 클릭
-2. 지도에서 이동 확인
-3. AI 알림 확인
-4. "✅" 클릭 → 다음 활동
-```
-
-## 🐛 API 키 문제 해결
-
-### API 키가 안 먹히면?
-
-1. **API 키 형식 확인**
-   ```
-   올바른 형식: up_...
-   잘못된 형식: sk-..., key-...
-   ```
-
-2. **API 키 재설정**
-   ```bash
-   # .env 파일 직접 수정
-   notepad .env
-   
-   # 내용:
-   UPSTAGE_API_KEY=up_YOUR_KEY_HERE
-   LLM_PROVIDER=upstage
-   LLM_MODEL=solar-pro
-   ```
-
-3. **앱 재시작**
-   ```bash
-   # Ctrl+C로 종료 후
-   streamlit run simulation_app.py
-   ```
-
-### API 호출 테스트
-```python
-# 가상환경에서
-python
->>> from openai import OpenAI
->>> client = OpenAI(
-...     api_key="up_YOUR_KEY",
-...     base_url="https://api.upstage.ai/v1/solar"
-... )
->>> response = client.chat.completions.create(
-...     model="solar-pro",
-...     messages=[{"role": "user", "content": "Hello"}],
-...     max_tokens=50
-... )
->>> print(response.choices[0].message.content)
-```
-
-## 📊 AI 작동 확인
-
-### 계획 생성이 AI에 의한 것인지 확인
-
-1. **계획 상세 보기**
-   - "계획 상세 보기" 확장 메뉴 클릭
-   - AI가 생성한 description 확인
-   - 트리거 메시지 확인 (AI가 생성)
-
-2. **로그 확인**
-   - 개발자 도구 (F12) → Console
-   - Upstage API 호출 로그 확인
-
-3. **다른 계획 생성**
-   - "초기화" → 새로운 입력
-   - AI가 매번 다른 계획 생성 확인
-
-## ⚙️ 설정 파일
-
-### .env
-```bash
-UPSTAGE_API_KEY=up_YOUR_KEY_HERE
-LLM_PROVIDER=upstage
-LLM_MODEL=solar-pro
-LLM_TEMPERATURE=0.7
-MAX_TOKENS=2000
-```
-
-### utils/config.py
-```python
-class Config:
-    UPSTAGE_API_KEY = os.getenv("UPSTAGE_API_KEY")
-    LLM_PROVIDER = "upstage"
-    LLM_MODEL = "solar-pro"
-```
-
-## 🔍 디버깅
-
-### AI가 계획을 안 만들면?
-
-1. **API 키 확인**
-   ```python
-   # simulation_app.py 상단에 추가
-   import os
-   print(f"API Key: {os.getenv('UPSTAGE_API_KEY')[:10]}...")
-   ```
-
-2. **에러 메시지 확인**
-   - "AI 응답 보기" 확장 메뉴
-   - raw_response 확인
-
-3. **네트워크 확인**
-   - 인터넷 연결 확인
-   - 방화벽 설정 확인
-
-### 알림이 AI가 만든 게 맞는지 확인
-
-```python
-# 알림 메시지에 "🤖" 이모지 포함
-notification = {
-    "title": f"🤖 {act.get('name')}",
-    "message": trig.get("message"),  # AI가 생성한 메시지
-    ...
+  ],
+  "preferences": {
+    "interests": ["문화", "음식", "쇼핑"],
+    "pace": "보통"
+  }
 }
 ```
 
 ## 📈 성능
 
-- **AI 계획 생성**: 5-10초
-- **이동 애니메이션**: 4초 (20단계 × 0.2초)
+- **AI 생성**: 5-10초
+- **이동 애니메이션**: 4초 (20단계)
 - **메모리**: ~50MB
-
-## 🎯 주요 파일
-
-```
-enilpoc/
-├── simulation_app.py (534줄)
-│   └── Upstage API 전용 UI
-│
-├── agent/
-│   ├── plan_generator.py     # AI 계획 생성
-│   ├── plan_rag.py            # 트리거 관리
-│   └── simulator.py           # 위치/시간/알림
-│
-├── utils/
-│   └── config.py              # Upstage API 설정
-│
-└── .env                       # API 키
-```
-
-## 🔮 다음 단계
-
-- [ ] AI가 날씨 기반 추천 추가
-- [ ] AI가 사용자 피드백 학습
-- [ ] 다국어 지원 (AI 번역)
-- [ ] 실시간 교통 정보 반영
+- **API 호출**: 1회 (계획 생성)
 
 ## 📄 라이센스
 
@@ -317,13 +472,15 @@ MIT License
 
 ---
 
-## ✅ Upstage API 작동 확인됨
+## ✅ 확인 완료
 
 ```
-Upstage Solar API: ✓ 작동 중
-계획 생성: ✓ AI 자동
-알림 생성: ✓ AI 자동
-트리거: ✓ AI 자동
+✓ Upstage API 작동
+✓ 사용자 입력 필수
+✓ AI 자동 생성
+✓ 샘플 계획 제거
+✓ 트리거 자동 설정
+✓ 알림 자동 생성
 ```
 
-**🤖 모든 기능이 AI에 의해 자동으로 생성됩니다!**
+**🎯 사용자가 요청 → AI가 모든 것을 생성합니다!**
