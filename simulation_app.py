@@ -1,4 +1,4 @@
-"""여행 시뮬레이터 - 완전한 버전 (알림 버그 수정 + 진짜 핸드폰 UI + 걷는 캐릭터)."""
+"""여행 시뮬레이터 - Upstage AI 전용 버전."""
 
 import streamlit as st
 from datetime import datetime, timedelta
@@ -15,7 +15,7 @@ from utils.config import config
 
 # 페이지 설정
 st.set_page_config(
-    page_title="여행 시뮬레이터",
+    page_title="AI 여행 시뮬레이터",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -57,9 +57,6 @@ if "character_thought" not in st.session_state:
 if "waiting_for_notification" not in st.session_state:
     st.session_state.waiting_for_notification = False
 
-if "notification_to_confirm" not in st.session_state:
-    st.session_state.notification_to_confirm = None
-
 
 def create_phone_html_component(notifications, time_info, location):
     """진짜 안드로이드 핸드폰 HTML 컴포넌트"""
@@ -96,7 +93,7 @@ def create_phone_html_component(notifications, time_info, location):
         <div style="padding: 50px 20px; text-align: center; color: #999;">
             <p style="font-size: 60px; margin: 0;">📱</p>
             <p style="font-size: 18px; font-weight: 500; margin: 15px 0 5px;">알림이 없습니다</p>
-            <p style="font-size: 14px;">계획을 생성하고 자동 진행을 시작하세요</p>
+            <p style="font-size: 14px;">AI가 계획을 생성하고 알림을 보낼 예정입니다</p>
         </div>
         '''
     
@@ -107,11 +104,7 @@ def create_phone_html_component(notifications, time_info, location):
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            * {{
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }}
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
             body {{
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
                 background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
@@ -142,16 +135,8 @@ def create_phone_html_component(notifications, time_info, location):
                 min-height: 600px;
                 padding: 10px 0;
             }}
-            h3 {{
-                color: #333;
-                margin: 15px 15px 5px;
-                font-size: 20px;
-            }}
-            .subtitle {{
-                color: #999;
-                font-size: 12px;
-                margin: 0 15px 10px;
-            }}
+            h3 {{ color: #333; margin: 15px 15px 5px; font-size: 20px; }}
+            .subtitle {{ color: #999; font-size: 12px; margin: 0 15px 10px; }}
         </style>
     </head>
     <body>
@@ -162,7 +147,7 @@ def create_phone_html_component(notifications, time_info, location):
                 <span>🔋 100%</span>
             </div>
             <div class="content">
-                <h3>🔔 알림</h3>
+                <h3>🔔 AI 알림</h3>
                 <p class="subtitle">전체: {len(notifications)} | 새 알림: {len(unread)}</p>
                 {notif_html}
             </div>
@@ -175,7 +160,7 @@ def create_phone_html_component(notifications, time_info, location):
 
 
 def create_map_with_walking_character(current_location, plan=None, path=[]):
-    """걷는 캐릭터가 있는 지도 (IconLayer 사용)"""
+    """걷는 캐릭터가 있는 지도"""
     
     view_state = pdk.ViewState(
         latitude=current_location["latitude"],
@@ -232,7 +217,7 @@ def create_map_with_walking_character(current_location, plan=None, path=[]):
                 )
             )
     
-    # 현재 위치 - 걷는 사람 (큰 빨간 원)
+    # 현재 위치 (큰 빨간 원)
     current_data = [{
         "position": [current_location["longitude"], current_location["latitude"]],
         "color": [255, 50, 50, 255],
@@ -261,37 +246,60 @@ def create_map_with_walking_character(current_location, plan=None, path=[]):
 
 
 # 메인 UI
-st.title("🗺️ AI 여행 시뮬레이터")
+st.title("🤖 AI 여행 시뮬레이터 (Upstage Solar)")
 
-# API 키 확인 (또는 샘플 계획 사용)
 current_plan = st.session_state.rag.get_current_plan()
 
-if not st.session_state.api_key_provided and not current_plan:
-    with st.expander("⚙️ API 키 설정 (선택사항)", expanded=False):
-        st.info("💡 샘플 계획이 이미 준비되어 있습니다! API 키 없이도 테스트 가능")
+# API 키 설정 (Upstage만)
+if not st.session_state.api_key_provided:
+    st.error("⚠️ Upstage API 키가 필요합니다")
+    
+    with st.expander("⚙️ Upstage API 키 설정", expanded=True):
+        st.info("💡 Upstage Solar API를 사용하여 AI가 계획을 생성합니다")
+        st.markdown("[Upstage API 키 발급받기](https://console.upstage.ai)")
         
-        provider = st.selectbox("LLM", ["openai", "anthropic", "upstage"])
-        api_key = st.text_input(f"{provider.upper()} API 키", type="password")
+        api_key = st.text_input("Upstage API 키", type="password", placeholder="up_...")
         
         if st.button("설정", type="primary") and api_key:
-            if provider == "openai":
-                config.OPENAI_API_KEY = api_key
-            elif provider == "anthropic":
-                config.ANTHROPIC_API_KEY = api_key
-            else:
-                config.UPSTAGE_API_KEY = api_key
-            config.LLM_PROVIDER = provider
+            # .env 파일 업데이트
+            config.UPSTAGE_API_KEY = api_key
+            config.LLM_PROVIDER = "upstage"
+            config.LLM_MODEL = "solar-pro"
+            
+            # .env 파일에 저장
+            import os
+            env_path = os.path.join(os.path.dirname(__file__), ".env")
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.write(f"UPSTAGE_API_KEY={api_key}\n")
+                f.write("LLM_PROVIDER=upstage\n")
+                f.write("LLM_MODEL=solar-pro\n")
+                f.write("LLM_TEMPERATURE=0.7\n")
+                f.write("MAX_TOKENS=2000\n")
             
             st.session_state.plan_generator = PlanGenerator()
             st.session_state.agent = TravelAgent()
             st.session_state.api_key_provided = True
+            st.success("✅ API 키 설정 완료!")
+            time.sleep(1)
             st.rerun()
+    
+    st.stop()
 
 # 계획 생성
-with st.expander("📝 여행 계획", expanded=not bool(current_plan)):
+with st.expander("📝 AI 여행 계획 생성", expanded=not bool(current_plan)):
     if current_plan:
-        st.success(f"✅ 계획: {current_plan.get('destination', '서울 하루 여행')}")
+        st.success(f"✅ AI 생성 계획: {current_plan.get('destination', '서울 하루 여행')}")
         st.write(f"활동: {len(current_plan.get('activities', []))}개")
+        
+        # 계획 상세 정보
+        with st.expander("계획 상세 보기"):
+            for idx, act in enumerate(current_plan.get('activities', [])):
+                st.markdown(f"**{idx+1}. {act.get('name')}** ({act.get('time')})")
+                st.write(f"📍 {act.get('location')}")
+                st.write(f"⏱️ {act.get('duration_minutes', 60)}분")
+                if act.get('description'):
+                    st.caption(act.get('description'))
+                st.markdown("---")
         
         if st.button("초기화", type="secondary"):
             st.session_state.rag.plans = {"plans": [], "current_plan_id": None}
@@ -302,27 +310,35 @@ with st.expander("📝 여행 계획", expanded=not bool(current_plan)):
             st.session_state.simulator.state["notifications"] = []
             st.rerun()
     else:
+        st.info("💡 Upstage Solar AI가 여행 계획을 자동 생성합니다")
+        
         plan_input = st.text_area(
-            "새 계획 입력 (API 키 필요)",
-            height=80,
-            placeholder="예: 서울 하루 여행. 경복궁, 북촌 한식당, 인사동, 명동"
+            "여행 계획 입력",
+            height=100,
+            placeholder="예: 서울 하루 여행. 오전에 경복궁 관람하고, 점심은 북촌 한식당에서 먹고, 오후에는 인사동에서 쇼핑하고, 저녁은 명동 맛집에서 먹고 싶어요"
         )
         
-        if st.button("생성", use_container_width=True, type="primary"):
-            if plan_input and st.session_state.api_key_provided:
-                with st.spinner("계획 생성 중..."):
+        if st.button("🤖 AI로 계획 생성", use_container_width=True, type="primary"):
+            if plan_input:
+                with st.spinner("🤖 Upstage Solar AI가 계획을 생성 중..."):
                     try:
                         result = st.session_state.plan_generator.generate_structured_plan(plan_input)
-                        if "error" not in result:
-                            st.success("✅ 완료!")
+                        
+                        if "error" in result:
+                            st.error(f"❌ 오류: {result['error']}")
+                            if "raw_response" in result:
+                                with st.expander("AI 응답 보기"):
+                                    st.code(result['raw_response'])
+                        else:
+                            st.success("✅ AI 계획 생성 완료!")
+                            st.balloons()
                             time.sleep(1)
                             st.rerun()
-                        else:
-                            st.error(f"오류: {result['error']}")
                     except Exception as e:
-                        st.error(f"오류: {str(e)}")
-            elif not st.session_state.api_key_provided:
-                st.error("API 키를 먼저 설정하세요")
+                        st.error(f"❌ 오류: {str(e)}")
+                        st.exception(e)
+            else:
+                st.warning("여행 계획을 입력하세요")
 
 st.markdown("---")
 
@@ -336,11 +352,11 @@ with col_left:
     
     # 말풍선
     if st.session_state.waiting_for_notification:
-        thought = "🔔 알림이 왔어! 확인해봐야겠다"
+        thought = "🔔 AI가 알림을 보냈어!"
     elif st.session_state.auto_playing:
         thought = f"🚶 {st.session_state.character_thought}"
     else:
-        thought = "여행 시작할 준비 완료! ✨"
+        thought = "AI 계획으로 여행 시작! ✨"
     
     st.info(thought)
     
@@ -365,7 +381,6 @@ with col_left:
                 st.session_state.movement_path = []
                 st.session_state.current_step = 0
                 st.session_state.waiting_for_notification = False
-                st.session_state.notification_to_confirm = None
                 
                 # 첫 번째 활동으로 이동
                 activity = current_plan["activities"][0]
@@ -393,7 +408,6 @@ with col_left:
             st.session_state.auto_playing = False
             st.session_state.waiting_for_notification = False
             st.session_state.current_step = 0
-            st.session_state.notification_to_confirm = None
             st.rerun()
 
 with col_right:
@@ -408,11 +422,11 @@ with col_right:
     # HTML 컴포넌트로 표시
     st.components.v1.html(phone_html, height=750, scrolling=False)
     
-    # 알림 확인 버튼 (streamlit 네이티브)
+    # 알림 확인 버튼
     unread = [n for n in notifications if not n.get("read", False)]
     
     if unread and st.session_state.waiting_for_notification:
-        st.warning("⚠️ 알림을 확인해주세요!")
+        st.warning("⚠️ AI 알림을 확인해주세요!")
         
         for notif in unread:
             actual_idx = notifications.index(notif)
@@ -423,12 +437,11 @@ with col_right:
                     st.write(f"🆕 **{notif.get('title')}**")
                 with col_n2:
                     if st.button("✅", key=f"confirm_{actual_idx}", type="primary"):
-                        # 알림 읽음 처리
                         st.session_state.simulator.mark_notification_read(actual_idx)
                         st.session_state.waiting_for_notification = False
                         st.rerun()
 
-# 자동 진행 애니메이션 로직
+# 자동 진행 로직
 if st.session_state.auto_playing and not st.session_state.waiting_for_notification:
     if st.session_state.current_step < st.session_state.total_steps:
         # 이동 중
@@ -463,14 +476,14 @@ if st.session_state.auto_playing and not st.session_state.waiting_for_notificati
             new_dt = dt.replace(hour=hour, minute=minute)
             st.session_state.simulator.update_datetime(new_dt.isoformat())
         
-        # 트리거 확인 (한 번만!)
+        # 트리거 확인 (AI가 생성한 트리거)
         triggered = st.session_state.rag.check_triggers(
             current_location=st.session_state.simulator.get_state()["location"],
             current_time=datetime.fromisoformat(st.session_state.simulator.state["datetime"]).strftime("%H:%M"),
             current_weather=st.session_state.simulator.get_state()["weather"]
         )
         
-        # 알림 생성
+        # AI 알림 생성
         if triggered and not st.session_state.waiting_for_notification:
             for t in triggered:
                 act = t["activity"]
@@ -478,8 +491,8 @@ if st.session_state.auto_playing and not st.session_state.waiting_for_notificati
                 
                 notification = {
                     "type": trig.get("type", "general"),
-                    "title": act.get("name", "알림"),
-                    "message": trig.get("message", "활동 알림"),
+                    "title": f"🤖 {act.get('name', '알림')}",
+                    "message": trig.get("message", "AI가 생성한 활동 알림"),
                     "activity": act,
                     "trigger": trig,
                     "time": datetime.now().strftime("%H:%M"),
@@ -513,8 +526,8 @@ if st.session_state.auto_playing and not st.session_state.waiting_for_notificati
             else:
                 # 모든 활동 완료
                 st.session_state.auto_playing = False
-                st.session_state.character_thought = "모든 일정 완료! 🎉"
+                st.session_state.character_thought = "AI 계획 완료! 🎉"
                 st.rerun()
 
 st.markdown("---")
-st.caption("🚶 실시간 여행 시뮬레이터 - pydeck + HTML Components")
+st.caption("🤖 Upstage Solar AI 여행 시뮬레이터 - 모든 계획과 알림이 AI에 의해 생성됩니다")
