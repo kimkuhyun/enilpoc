@@ -1,4 +1,4 @@
-"""여행 시뮬레이터 - Upstage AI 전용 버전 (사용자 입력 필수)."""
+"""여행 시뮬레이터 - Upstage AI 전용 (버그 수정 + 전국 대응)."""
 
 import streamlit as st
 from datetime import datetime, timedelta
@@ -56,6 +56,10 @@ if "character_thought" not in st.session_state:
 
 if "waiting_for_notification" not in st.session_state:
     st.session_state.waiting_for_notification = False
+
+# 🔥 알림 버그 수정: 이미 알림 생성한 활동 추적
+if "notified_activities" not in st.session_state:
+    st.session_state.notified_activities = set()
 
 
 def create_phone_html_component(notifications, time_info, location):
@@ -245,8 +249,24 @@ def create_map_with_walking_character(current_location, plan=None, path=[]):
     return deck
 
 
+def initialize_simulation_location(plan):
+    """🔥 전국 대응: 계획의 첫 번째 활동 위치로 시뮬레이터 초기화"""
+    if plan and plan.get("activities") and len(plan["activities"]) > 0:
+        first_activity = plan["activities"][0]
+        
+        # 첫 번째 활동 위치로 이동
+        st.session_state.simulator.update_location(
+            first_activity.get("latitude", 37.5665),
+            first_activity.get("longitude", 126.9780),
+            f"{first_activity.get('location', '시작 위치')} 근처"
+        )
+        
+        return True
+    return False
+
+
 # 메인 UI
-st.title("🤖 AI 여행 시뮬레이터 (Upstage Solar)")
+st.title("🤖 AI 여행 시뮬레이터 (전국 대응)")
 
 current_plan = st.session_state.rag.get_current_plan()
 
@@ -285,17 +305,28 @@ if not st.session_state.api_key_provided:
     
     st.stop()
 
-# 계획 입력 (계획이 없으면 확장, 있으면 축소)
+# 계획 입력
 with st.expander("📝 AI 여행 계획 생성", expanded=not bool(current_plan)):
     if current_plan:
-        st.success(f"✅ AI 생성 계획: {current_plan.get('destination', '서울 하루 여행')}")
+        # 🔥 계획이 있으면 초기 위치 설정
+        if "simulation_initialized" not in st.session_state:
+            if initialize_simulation_location(current_plan):
+                st.session_state.simulation_initialized = True
+        
+        st.success(f"✅ AI 생성 계획: {current_plan.get('destination', '여행')}")
         st.write(f"📍 활동: {len(current_plan.get('activities', []))}개")
+        
+        # 첫 번째 위치 표시
+        if current_plan.get("activities"):
+            first_loc = current_plan["activities"][0]
+            st.info(f"🎯 시작 위치: {first_loc.get('location')} ({first_loc.get('latitude'):.4f}, {first_loc.get('longitude'):.4f})")
         
         # 계획 상세 정보
         with st.expander("📋 계획 상세 보기"):
             for idx, act in enumerate(current_plan.get('activities', [])):
                 st.markdown(f"**{idx+1}. {act.get('name')}** ({act.get('time')})")
                 st.write(f"📍 {act.get('location')}")
+                st.write(f"🌍 좌표: ({act.get('latitude'):.4f}, {act.get('longitude'):.4f})")
                 st.write(f"⏱️ {act.get('duration_minutes', 60)}분")
                 if act.get('description'):
                     st.caption(f"ℹ️ {act.get('description')}")
@@ -311,18 +342,37 @@ with st.expander("📝 AI 여행 계획 생성", expanded=not bool(current_plan)
                 st.session_state.auto_playing = False
                 st.session_state.simulator.state["notifications"] = []
                 st.session_state.character_thought = "여행 계획을 기다리는 중..."
+                st.session_state.notified_activities = set()  # 🔥 초기화
+                st.session_state.simulation_initialized = False
                 st.rerun()
     else:
-        # 계획이 없을 때 - 입력 필수!
+        # 계획이 없을 때
         st.warning("⚠️ 여행 계획이 없습니다. 아래에 계획을 입력하세요!")
         
-        st.info("💡 **시뮬레이션 시작 방법**\n\n1️⃣ 아래 텍스트 영역에 여행 계획 입력\n2️⃣ AI가 자동으로 구조화된 계획 생성\n3️⃣ \"▶️ 자동 진행\" 버튼으로 시뮬레이션 시작")
+        st.info("💡 **시뮬레이션 시작 방법**\n\n1️⃣ 아래에 여행 계획 입력 (전국 어디든 가능!)\n2️⃣ AI가 자동으로 구조화\n3️⃣ \"▶️ 자동 진행\" 시작")
+        
+        # 지역별 예시 제공
+        st.markdown("**📍 지역별 예시:**")
+        col_ex1, col_ex2, col_ex3 = st.columns(3)
+        with col_ex1:
+            if st.button("🏰 서울", use_container_width=True):
+                st.session_state.example_input = "서울 하루 여행. 경복궁, 북촌 한식당, 인사동"
+                st.rerun()
+        with col_ex2:
+            if st.button("🏖️ 부산", use_container_width=True):
+                st.session_state.example_input = "부산 하루 여행. 해운대, 자갈치시장, 광안리"
+                st.rerun()
+        with col_ex3:
+            if st.button("🏔️ 강원도", use_container_width=True):
+                st.session_state.example_input = "강원도 속초 하루 여행. 속초해수욕장, 중앙시장, 설악산"
+                st.rerun()
         
         plan_input = st.text_area(
             "여행 계획 입력 (필수)",
             height=120,
-            placeholder="예: 서울 하루 여행. 오전에 경복궁 관람하고, 점심은 북촌 한식당에서 먹고, 오후에는 인사동에서 쇼핑하고, 저녁은 명동 맛집에서 먹고 싶어요",
-            help="구체적으로 입력할수록 AI가 더 정확한 계획을 생성합니다"
+            value=st.session_state.get("example_input", ""),
+            placeholder="예: 강원도 속초 하루 여행. 아침에 속초해수욕장 산책하고, 점심은 중앙시장에서 먹고, 오후에는 설악산 케이블카 타고 싶어요",
+            help="전국 어디든 가능합니다! 구체적으로 입력할수록 AI가 더 정확한 계획을 생성합니다"
         )
         
         if st.button("🤖 AI로 계획 생성", use_container_width=True, type="primary", disabled=not plan_input):
@@ -339,6 +389,12 @@ with st.expander("📝 AI 여행 계획 생성", expanded=not bool(current_plan)
                         else:
                             st.success("✅ AI 계획 생성 완료!")
                             st.balloons()
+                            
+                            # 🔥 초기화
+                            st.session_state.notified_activities = set()
+                            st.session_state.simulation_initialized = False
+                            st.session_state.example_input = ""
+                            
                             time.sleep(1)
                             st.rerun()
                     except Exception as e:
@@ -353,7 +409,7 @@ if not current_plan:
 
 st.markdown("---")
 
-# 분할 레이아웃 (계획이 있을 때만 표시)
+# 분할 레이아웃
 col_left, col_right = st.columns([2, 1])
 
 current_state = st.session_state.simulator.get_state()
@@ -392,6 +448,7 @@ with col_left:
                 st.session_state.movement_path = []
                 st.session_state.current_step = 0
                 st.session_state.waiting_for_notification = False
+                st.session_state.notified_activities = set()  # 🔥 초기화
                 
                 # 첫 번째 활동으로 이동
                 activity = current_plan["activities"][0]
@@ -419,6 +476,7 @@ with col_left:
             st.session_state.auto_playing = False
             st.session_state.waiting_for_notification = False
             st.session_state.current_step = 0
+            st.session_state.notified_activities = set()  # 🔥 초기화
             st.session_state.character_thought = "AI 계획 대기 중..."
             st.rerun()
 
@@ -472,6 +530,7 @@ if st.session_state.auto_playing and not st.session_state.waiting_for_notificati
     else:
         # 목적지 도착
         activity = current_plan["activities"][st.session_state.current_activity_index]
+        activity_id = f"{st.session_state.current_activity_index}_{activity.get('name')}"
         
         # 최종 위치 업데이트
         st.session_state.simulator.update_location(
@@ -488,36 +547,41 @@ if st.session_state.auto_playing and not st.session_state.waiting_for_notificati
             new_dt = dt.replace(hour=hour, minute=minute)
             st.session_state.simulator.update_datetime(new_dt.isoformat())
         
-        # 트리거 확인 (AI가 생성한 트리거)
-        triggered = st.session_state.rag.check_triggers(
-            current_location=st.session_state.simulator.get_state()["location"],
-            current_time=datetime.fromisoformat(st.session_state.simulator.state["datetime"]).strftime("%H:%M"),
-            current_weather=st.session_state.simulator.get_state()["weather"]
-        )
-        
-        # AI 알림 생성
-        if triggered and not st.session_state.waiting_for_notification:
-            for t in triggered:
-                act = t["activity"]
-                trig = t["trigger"]
-                
-                notification = {
-                    "type": trig.get("type", "general"),
-                    "title": f"🤖 {act.get('name', '알림')}",
-                    "message": trig.get("message", "AI가 생성한 활동 알림"),
-                    "activity": act,
-                    "trigger": trig,
-                    "time": datetime.now().strftime("%H:%M"),
-                    "read": False
-                }
-                st.session_state.simulator.add_notification(notification)
+        # 🔥 알림 버그 수정: 이미 알림을 생성했는지 확인
+        if activity_id not in st.session_state.notified_activities:
+            # 트리거 확인
+            triggered = st.session_state.rag.check_triggers(
+                current_location=st.session_state.simulator.get_state()["location"],
+                current_time=datetime.fromisoformat(st.session_state.simulator.state["datetime"]).strftime("%H:%M"),
+                current_weather=st.session_state.simulator.get_state()["weather"]
+            )
             
-            # 알림 확인 대기
-            st.session_state.waiting_for_notification = True
-            st.rerun()
+            # AI 알림 생성 (한 번만!)
+            if triggered:
+                for t in triggered:
+                    act = t["activity"]
+                    trig = t["trigger"]
+                    
+                    notification = {
+                        "type": trig.get("type", "general"),
+                        "title": f"🤖 {act.get('name', '알림')}",
+                        "message": trig.get("message", "AI가 생성한 활동 알림"),
+                        "activity": act,
+                        "trigger": trig,
+                        "time": datetime.now().strftime("%H:%M"),
+                        "read": False
+                    }
+                    st.session_state.simulator.add_notification(notification)
+                
+                # 🔥 이 활동에 대해 알림 생성했음을 기록
+                st.session_state.notified_activities.add(activity_id)
+                
+                # 알림 확인 대기
+                st.session_state.waiting_for_notification = True
+                st.rerun()
         
-        # 알림이 없으면 다음 활동으로
-        if not triggered:
+        # 알림이 없거나 이미 생성했으면 다음 활동으로
+        if activity_id in st.session_state.notified_activities or not triggered:
             st.session_state.current_activity_index += 1
             
             if st.session_state.current_activity_index < len(current_plan["activities"]):
@@ -542,4 +606,4 @@ if st.session_state.auto_playing and not st.session_state.waiting_for_notificati
                 st.rerun()
 
 st.markdown("---")
-st.caption("🤖 Upstage Solar AI - 사용자가 요청하면 AI가 계획/알림을 자동 생성합니다")
+st.caption("🤖 Upstage Solar AI - 전국 어디든 여행 가능 | 알림 버그 수정 완료")
