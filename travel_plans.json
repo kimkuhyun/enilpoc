@@ -1,0 +1,227 @@
+{
+  "plans": [
+    {
+      "id": "plan_20260120_141212",
+      "created_at": "2026-01-20T14:12:12.310286",
+      "destination": "서울",
+      "start_date": "2023-10-07",
+      "end_date": "2023-10-07",
+      "activities": [
+        {
+          "name": "경복궁 방문",
+          "location": "경복궁",
+          "latitude": 37.5796,
+          "longitude": 126.977,
+          "time": "09:00",
+          "description": "조선 왕조의 대표 궁궐인 경복궁 탐방",
+          "duration_minutes": 120,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "09:00",
+              "message": "경복궁 방문 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5796,
+              "longitude": 126.977,
+              "radius": 0.3,
+              "message": "경복궁 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "명동 점심 식사",
+          "location": "명동",
+          "latitude": 37.5636,
+          "longitude": 126.9834,
+          "time": "12:00",
+          "description": "명동 거리 음식점에서 다양한 점심 메뉴 즐기기",
+          "duration_minutes": 60,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "12:00",
+              "message": "명동에서 점심 식사 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5636,
+              "longitude": 126.9834,
+              "radius": 0.2,
+              "message": "명동 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "남산타워 관람",
+          "location": "남산타워",
+          "latitude": 37.5512,
+          "longitude": 126.9882,
+          "time": "14:30",
+          "description": "서울 시내 전망을 감상할 수 있는 남산타워 방문",
+          "duration_minutes": 90,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "14:30",
+              "message": "남산타워 관람 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5512,
+              "longitude": 126.9882,
+              "radius": 0.25,
+              "message": "남산타워 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "홍대 저녁 식사",
+          "location": "홍대입구",
+          "latitude": 37.5568,
+          "longitude": 126.9236,
+          "time": "18:00",
+          "description": "홍대 거리 음식점에서 저녁 식사 및 분위기 즐기기",
+          "duration_minutes": 90,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "18:00",
+              "message": "홍대에서 저녁 식사 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5568,
+              "longitude": 126.9236,
+              "radius": 0.3,
+              "message": "홍대입구 근처에 도착했습니다"
+            }
+          ]
+        }
+      ],
+      "triggers": [],
+      "preferences": {
+        "interests": [
+          "문화",
+          "음식",
+          "관광"
+        ],
+        "pace": "보통"
+      },
+      "modified_at": "2026-01-20T14:12:12.310286"
+    },
+    {
+      "id": "plan_20260120_141308",
+      "created_at": "2026-01-20T14:13:08.618774",
+      "destination": "서울",
+      "start_date": "2023-10-21",
+      "end_date": "2023-10-21",
+      "activities": [
+        {
+          "name": "경복궁 방문",
+          "location": "경복궁",
+          "latitude": 37.5796,
+          "longitude": 126.977,
+          "time": "09:00",
+          "description": "조선 왕조의 정궁인 경복궁에서 역사 탐방",
+          "duration_minutes": 120,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "09:00",
+              "message": "경복궁 관람 시작 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5796,
+              "longitude": 126.977,
+              "radius": 0.3,
+              "message": "경복궁 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "명동 점심 식사",
+          "location": "명동",
+          "latitude": 37.5636,
+          "longitude": 126.9834,
+          "time": "12:00",
+          "description": "명동 거리 음식점에서 다양한 한국 음식 체험",
+          "duration_minutes": 60,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "12:00",
+              "message": "점심 식사 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5636,
+              "longitude": 126.9834,
+              "radius": 0.2,
+              "message": "명동 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "남산타워 관광",
+          "location": "남산타워",
+          "latitude": 37.5512,
+          "longitude": 126.9882,
+          "time": "14:00",
+          "description": "서울 시내 전망을 감상할 수 있는 남산타워 방문",
+          "duration_minutes": 90,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "14:00",
+              "message": "남산타워 관람 시작 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5512,
+              "longitude": 126.9882,
+              "radius": 0.25,
+              "message": "남산타워 근처에 도착했습니다"
+            }
+          ]
+        },
+        {
+          "name": "홍대 저녁 식사",
+          "location": "홍대입구",
+          "latitude": 37.5568,
+          "longitude": 126.9236,
+          "time": "18:00",
+          "description": "홍대 거리 음식점과 카페에서 저녁 식사 및 분위기 체험",
+          "duration_minutes": 90,
+          "triggers": [
+            {
+              "type": "time",
+              "time": "18:00",
+              "message": "저녁 식사 시간입니다"
+            },
+            {
+              "type": "location",
+              "latitude": 37.5568,
+              "longitude": 126.9236,
+              "radius": 0.3,
+              "message": "홍대입구 근처에 도착했습니다"
+            }
+          ]
+        }
+      ],
+      "triggers": [],
+      "preferences": {
+        "interests": [
+          "문화",
+          "음식",
+          "관광"
+        ],
+        "pace": "보통"
+      },
+      "modified_at": "2026-01-20T14:13:08.618774"
+    }
+  ],
+  "current_plan_id": "plan_20260120_141308"
+}
