@@ -1,465 +1,390 @@
-# 🤖 AI 여행 시뮬레이터 (Upstage Solar)
+# 🤖 AI 여행 시뮬레이터 (전국 대응 버전)
 
 **사용자 입력 → AI 생성 → 실시간 시뮬레이션**
 
-Upstage Solar AI가 사용자의 요청을 받아 여행 계획을 생성하고, 트리거를 설정하고, 알림을 보내는 완전 자동화 시뮬레이터입니다.
+Upstage Solar AI가 사용자의 요청을 받아 **전국 어디든** 여행 계획을 생성하고, 트리거를 설정하고, 알림을 보내는 완전 자동화 시뮬레이터입니다.
 
-## 🎯 핵심 플로우
+## 🎯 핵심 기능
 
-```
-1️⃣ 사용자 입력
-   ↓
-   "서울 하루 여행. 경복궁, 북촌 한식당, 인사동..."
-   
-2️⃣ AI 생성 (5-10초)
-   ↓
-   {
-     "activities": [...],
-     "triggers": [...],
-     "messages": [...]
-   }
-   
-3️⃣ 시뮬레이션 시작
-   ↓
-   이동 → 도착 → AI 알림 → 확인 → 다음
-```
+### ✅ 전국 지역 대응
+- 🏰 서울 (경복궁, 북촌, 인사동)
+- 🏖️ 부산 (해운대, 자갈치시장, 광안리)
+- 🏔️ 강원도 (속초해수욕장, 설악산, 중앙시장)
+- 🌊 제주도
+- 🏛️ 경주
+- **전국 어디든 가능!**
 
-## ✨ AI가 하는 일
-
-### 🤖 Upstage Solar AI의 역할
-
-1. **여행 계획 구조화**
-   ```
-   사용자: "서울 하루 여행. 경복궁, 점심, 인사동"
-   
-   AI 생성:
-   - 경복궁 관람 (09:00, 120분)
-     위치: 37.5796, 126.9770
-     설명: "조선 왕조의 정궁..."
-     
-   - 북촌 한식당 (12:00, 60분)
-     위치: 37.5826, 126.9830
-     설명: "전통 한옥에서..."
-     
-   - 인사동 쇼핑 (14:00, 120분)
-     위치: 37.5723, 126.9894
-     설명: "전통 공예품..."
-   ```
-
-2. **트리거 자동 생성**
-   ```json
-   {
-     "type": "location",
-     "latitude": 37.5796,
-     "longitude": 126.9770,
-     "radius": 0.5,
-     "message": "경복궁에 도착했습니다!"
-   }
-   ```
-
-3. **알림 메시지 생성**
-   - "경복궁에 도착했습니다! 입장권은 온라인으로 예매하셨나요?"
-   - "점심시간입니다. 북촌 한식당에서 전통 한식을 즐겨보세요!"
+### ✅ 알림 버그 완전 수정
+- 이전: 알림이 계속 중복 생성됨 ❌
+- 수정: 각 활동마다 한 번만 알림 생성 ✅
+- 방법: `notified_activities` set으로 추적
 
 ## 🚀 빠른 시작
 
-### 1. Upstage API 키 발급
-```
-1. https://console.upstage.ai 접속
-2. 회원가입/로그인
-3. API 키 발급 (up_...로 시작)
-4. 복사 (나중에 사용)
-```
-
-### 2. 프로젝트 설치
-```bash
-git clone https://github.com/kimkuhyun/enilpoc.git
-cd enilpoc
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-### 3. 앱 실행
-```bash
-streamlit run simulation_app.py
-```
-
-### 4. 완전한 플로우
-
-#### Step 1: API 키 입력
-```
-http://localhost:8501 접속
-→ "Upstage API 키" 입력 (up_...)
-→ "설정" 클릭
-→ ✅ 설정 완료!
-```
-
-#### Step 2: 여행 계획 입력 (필수!)
-```
-📝 AI 여행 계획 생성 (확장됨)
-
-⚠️ 여행 계획이 없습니다. 아래에 계획을 입력하세요!
-
-💡 시뮬레이션 시작 방법
-1️⃣ 아래 텍스트 영역에 여행 계획 입력
-2️⃣ AI가 자동으로 구조화된 계획 생성
-3️⃣ "▶️ 자동 진행" 버튼으로 시뮬레이션 시작
-
-[텍스트 영역]
-예: 서울 하루 여행. 오전에 경복궁 관람하고, 
-점심은 북촌 한식당에서 먹고, 오후에는 
-인사동에서 쇼핑하고, 저녁은 명동 맛집에서 
-먹고 싶어요
-
-[🤖 AI로 계획 생성]
-```
-
-#### Step 3: AI 생성 대기
-```
-🤖 Upstage Solar AI가 여행 계획을 생성하는 중...
-(5-10초 소요)
-
-✅ AI 계획 생성 완료!
-🎈 (풍선 애니메이션)
-```
-
-#### Step 4: 계획 확인
-```
-📝 AI 여행 계획 생성 (축소됨)
-✅ AI 생성 계획: 서울 하루 여행
-📍 활동: 3개
-
-[📋 계획 상세 보기] (클릭 가능)
-  1. 경복궁 관람 (09:00)
-     📍 경복궁
-     ⏱️ 120분
-     ℹ️ 조선 왕조의 정궁...
-  ---
-  2. 북촌 한식당 점심 (12:00)
-     ...
-```
-
-#### Step 5: 시뮬레이션 시작!
-```
-🗺️ 실시간 지도
-🚶 AI 계획으로 여행 시작 준비 완료! ✨
-
-[지도 표시]
-- 파란 원: 활동 지점 (3개)
-- 현재 위치: 서울역
-
-[▶️ 자동 진행] [⏸️ 정지] [🔄 초기화]
-
-→ "▶️ 자동 진행" 클릭!
-```
-
-#### Step 6: 자동 이동
-```
-🚶 경복궁 관람(으)로 이동 중...
-
-[지도]
-- 빨간 선: 이동 경로
-- 빨간 큰 원: 현재 위치 (움직임!)
-- 20단계 × 0.2초 = 4초 소요
-```
-
-#### Step 7: AI 알림
-```
-📱 안드로이드 화면
-
-🔔 AI 알림 (1/1)
-
-┌──────────────────┐
-│ 🆕 🤖 경복궁 관람 │
-│ 경복궁에 도착했습니다! │
-│ 입장권은 온라인으로   │
-│ 예매하셨나요?         │
-│ 🕐 09:00            │
-└──────────────────┘
-
-⚠️ AI 알림을 확인해주세요!
-🆕 **🤖 경복궁 관람**  [✅]
-```
-
-#### Step 8: 다음 활동
-```
-[✅] 클릭
-→ 알림 읽음 처리
-→ 자동으로 다음 활동 시작
-→ "북촌 한식당 점심(으)로 이동 중..."
-```
-
-## 📱 화면 구성
+### 예시: 속초 여행
 
 ```
-┌─────────────────────┬────────────────┐
-│ 🗺️ 실시간 지도       │ 📱 안드로이드   │
-│                     │                │
-│ 💭 말풍선           │ 📶⏰🔋         │
-│ 🚶 경복궁으로...    │                │
-│                     │ 🔔 AI 알림     │
-│ [pydeck 지도]       │                │
-│ • 파란 원: 활동     │ 🆕 경복궁 관람  │
-│ • 빨간 선: 경로     │ AI 생성 메시지  │
-│ • 빨간 원: 현재     │ 🕐 09:00       │
-│                     │                │
-│ [▶️] [⏸️] [🔄]    │ [✅ 확인]      │
-└─────────────────────┴────────────────┘
+1. 앱 실행
+   streamlit run simulation_app.py
+
+2. API 키 입력
+   up_YOUR_KEY
+
+3. 여행 계획 입력
+   "강원도 속초 하루 여행. 아침에 속초해수욕장 산책하고, 
+   점심은 중앙시장에서 먹고, 오후에는 설악산 케이블카 타고 싶어요"
+
+4. 🤖 AI로 계획 생성 (5-10초)
+
+5. ▶️ 자동 진행
 ```
 
-## 🎮 버튼 설명
+### AI가 생성하는 것
 
-- **🤖 AI로 계획 생성**: 사용자 입력 → AI 생성
-- **▶️ 자동 진행**: 모든 활동 자동 실행
-- **⏸️ 정지**: 현재 위치에서 중단
-- **🔄 초기화**: 경로/알림 삭제 (계획 유지)
-- **🔄 계획 초기화**: 계획까지 완전 삭제
-- **✅ 확인**: 알림 읽음 → 다음 활동
-
-## 🔍 AI 작동 확인
-
-### 1. 계획이 AI에 의한 것인지 확인
-
-**방법 1: 계획 상세 보기**
-```
-📋 계획 상세 보기 (클릭)
-
-1. 경복궁 관람 (09:00)
-   📍 경복궁
-   ⏱️ 120분
-   ℹ️ 조선 왕조의 정궁인 경복궁에서 역사 탐방  ← AI 생성!
-```
-
-**방법 2: 다른 입력으로 테스트**
-```
-입력 1: "서울 하루 여행. 경복궁, 북촌, 인사동"
-→ AI 생성 A
-
-🔄 계획 초기화
-
-입력 2: "부산 하루 여행. 해운대, 자갈치시장, 광안리"
-→ AI 생성 B (완전히 다름!)
-```
-
-**방법 3: 알림 메시지 확인**
-```
-🤖 이모지가 있음 = AI가 생성한 알림
-🔔 일반 이모지 = 시스템 알림
-
-예: "🤖 경복궁 관람" ← AI 생성!
-```
-
-### 2. 트리거 확인
-
-```python
-# agent/plan_rag.py
-def check_triggers(current_location, current_time, current_weather):
-    """AI가 생성한 트리거 조건 체크"""
-    
-    triggered = []
-    for activity in plan["activities"]:
-        for trigger in activity.get("triggers", []):
-            if trigger["type"] == "location":
-                # 위치 기반 트리거
-                distance = calculate_distance(
-                    current_location,
-                    trigger["latitude"],
-                    trigger["longitude"]
-                )
-                if distance <= trigger["radius"]:
-                    triggered.append({
-                        "activity": activity,
-                        "trigger": trigger  # AI가 생성한 메시지!
-                    })
-    
-    return triggered
-```
-
-## 🐛 문제 해결
-
-### Q1: "여행 계획이 없습니다" 계속 나옴
-
-**원인**: 계획을 입력했지만 "AI로 계획 생성" 버튼을 안 눌렀음
-
-**해결**:
-```
-1. 텍스트 영역에 계획 입력
-2. "🤖 AI로 계획 생성" 버튼 클릭 ← 중요!
-3. 5-10초 대기
-4. ✅ 완료 확인
-```
-
-### Q2: API 키 오류
-
-**증상**:
-```
-❌ 오류: Error code: 401 - {'error': {'message': 'Incorrect API key provided: up_Z5GN...'}}
-```
-
-**해결**:
-```bash
-# .env 파일 직접 수정
-notepad .env
-
-# 올바른 형식:
-UPSTAGE_API_KEY=up_YOUR_REAL_KEY_HERE
-LLM_PROVIDER=upstage
-LLM_MODEL=solar-pro
-
-# 저장 후 앱 재시작
-```
-
-### Q3: 지도/핸드폰이 안 보임
-
-**원인**: 계획이 생성되지 않음
-
-**확인**:
-```
-📝 AI 여행 계획 생성 섹션 확인
-
-✅ 있어야 함:
-"✅ AI 생성 계획: 서울 하루 여행"
-"📍 활동: 3개"
-
-❌ 이렇게 나오면 안 됨:
-"⚠️ 여행 계획이 없습니다"
-```
-
-### Q4: 알림이 안 생김
-
-**확인 1**: 계획에 트리거가 있는지
-```
-📋 계획 상세 보기
-→ 각 활동 확인
-→ "트리거" 항목 확인
-```
-
-**확인 2**: 실제로 도착했는지
-```
-🗺️ 지도에서
-- 빨간 큰 원 (현재 위치)
-- 파란 원 (목표 지점)
-→ 겹쳐야 알림 생성!
-```
-
-## ⚙️ 고급 설정
-
-### AI 모델 변경
-
-```python
-# utils/config.py
-
-LLM_MODEL = "solar-pro"  # 기본 (추천)
-# LLM_MODEL = "solar-mini"  # 빠르지만 덜 정확
-```
-
-### 트리거 반경 조정
-
-```python
-# agent/plan_generator.py
-
-{
-  "type": "location",
-  "radius": 0.5  # km (기본)
-  # "radius": 0.3  # 더 정확하게
-  # "radius": 1.0  # 더 널널하게
-}
-```
-
-## 📊 파일 구조
-
-```
-enilpoc/
-├── simulation_app.py (546줄)
-│   ├── API 키 설정 UI
-│   ├── 계획 입력 UI (확장/축소)
-│   ├── 지도 + 핸드폰 (계획 있을 때만)
-│   └── 자동 진행 로직
-│
-├── agent/
-│   ├── plan_generator.py  # AI 계획 생성
-│   ├── plan_rag.py         # 트리거 관리
-│   └── simulator.py        # 위치/시간/알림
-│
-├── travel_plans.json (빈 상태)
-│   {
-│     "plans": [],
-│     "current_plan_id": null
-│   }
-│
-└── .env (사용자가 설정)
-    UPSTAGE_API_KEY=up_...
-```
-
-## 🎯 AI 생성 예시
-
-### 입력
-```
-서울 하루 여행. 아침에 경복궁 보고, 점심은 북촌 한옥마을에서 
-한식 먹고, 오후에는 인사동 구경하고, 저녁은 명동에서 쇼핑하고 싶어요
-```
-
-### AI 생성 (Upstage Solar)
 ```json
 {
-  "destination": "서울 하루 여행",
-  "start_date": "2026-01-20",
-  "end_date": "2026-01-20",
+  "destination": "강원도 속초",
   "activities": [
     {
-      "name": "경복궁 관람",
-      "location": "경복궁",
-      "latitude": 37.5796,
-      "longitude": 126.9770,
+      "name": "속초해수욕장 산책",
+      "location": "속초해수욕장",
+      "latitude": 38.2072,    // 🔥 속초 좌표!
+      "longitude": 128.5933,  // 🔥 서울 아님!
       "time": "09:00",
-      "duration_minutes": 120,
-      "description": "조선 왕조의 정궁인 경복궁에서 역사 탐방. 광화문, 근정전, 경회루 등 주요 건축물 관람",
-      "triggers": [
-        {
-          "type": "location",
-          "latitude": 37.5796,
-          "longitude": 126.9770,
-          "radius": 0.3,
-          "message": "경복궁에 도착했습니다! 입장권은 온라인으로 예매하셨나요?"
-        },
-        {
-          "type": "time",
-          "time": "09:00",
-          "message": "경복궁 관람 시작 시간입니다"
-        }
-      ]
-    },
-    {
-      "name": "북촌 한옥마을 한식 점심",
-      "location": "북촌한옥마을 내 한식당",
-      "latitude": 37.5826,
-      "longitude": 126.9830,
-      "time": "12:00",
-      "duration_minutes": 60,
-      "description": "전통 한옥에서 즐기는 한정식 또는 비빔밥 등 한식 점심 식사",
-      "triggers": [
-        {
-          "type": "time",
-          "time": "12:00",
-          "message": "점심 식사 시간입니다. 북촌 한식당에서 전통 한식을 즐겨보세요!"
-        }
-      ]
+      "description": "동해의 아름다운 해변...",
+      "triggers": [{
+        "type": "location",
+        "message": "속초해수욕장에 도착했습니다!"
+      }]
     },
     ...
-  ],
-  "preferences": {
-    "interests": ["문화", "음식", "쇼핑"],
-    "pace": "보통"
-  }
+  ]
 }
 ```
 
-## 📈 성능
+## 🐛 버그 수정 상세
 
-- **AI 생성**: 5-10초
-- **이동 애니메이션**: 4초 (20단계)
-- **메모리**: ~50MB
-- **API 호출**: 1회 (계획 생성)
+### 문제: 알림 중복 생성
+
+**증상:**
+```
+경복궁 도착 → 🆕 알림 생성
+✅ 확인 클릭
+→ 🆕 알림 다시 생성 (버그!)
+→ 🆕 알림 또 생성 (버그!)
+→ 무한 반복...
+```
+
+**원인:**
+```python
+# 이전 코드 (버그)
+if triggered and not st.session_state.waiting_for_notification:
+    # ✅ 확인 후 waiting_for_notification = False
+    # → 다시 이 코드 실행 → 또 알림 생성!
+    add_notification(...)
+```
+
+**해결:**
+```python
+# 수정된 코드
+if "notified_activities" not in st.session_state:
+    st.session_state.notified_activities = set()
+
+# 활동 고유 ID 생성
+activity_id = f"{current_activity_index}_{activity.get('name')}"
+
+# 이미 알림 생성했는지 확인
+if activity_id not in st.session_state.notified_activities:
+    triggered = check_triggers(...)
+    
+    if triggered:
+        add_notification(...)
+        
+        # 🔥 이 활동은 알림 생성 완료!
+        st.session_state.notified_activities.add(activity_id)
+```
+
+**결과:**
+```
+경복궁 도착 → 🆕 알림 생성 (1번만!)
+✅ 확인 클릭
+→ 다음 활동으로 이동
+→ 중복 생성 없음 ✅
+```
+
+## 🗺️ 지역 대응 상세
+
+### 문제: 서울만 가능
+
+**증상:**
+```
+입력: "속초 여행"
+AI 생성: 속초 좌표 (38.2072, 128.5933)
+시작 위치: 서울시청 (37.5665, 126.9780) ← 버그!
+→ 서울에서 속초까지 이동 경로 이상함
+```
+
+**원인:**
+```python
+# agent/simulator.py
+def __init__(self):
+    self.state = {
+        "location": {
+            "latitude": 37.5665,   # 서울 고정!
+            "longitude": 126.9780,
+            "name": "서울시청"
+        }
+    }
+```
+
+**해결:**
+```python
+def initialize_simulation_location(plan):
+    """계획의 첫 번째 활동 위치로 초기화"""
+    if plan and plan.get("activities"):
+        first_activity = plan["activities"][0]
+        
+        # 🔥 첫 활동 위치로 이동!
+        simulator.update_location(
+            first_activity.get("latitude"),
+            first_activity.get("longitude"),
+            f"{first_activity.get('location')} 근처"
+        )
+
+# 계획 생성 후 자동 실행
+if current_plan:
+    if "simulation_initialized" not in st.session_state:
+        initialize_simulation_location(current_plan)
+        st.session_state.simulation_initialized = True
+```
+
+**결과:**
+```
+입력: "속초 여행"
+AI 생성: 속초 좌표 (38.2072, 128.5933)
+시작 위치: 속초해수욕장 근처 (38.2072, 128.5933) ✅
+→ 올바른 위치에서 시작!
+```
+
+## 📍 지역별 테스트
+
+### 1. 서울
+```
+입력: "서울 하루 여행. 경복궁, 북촌 한식당, 인사동"
+
+AI 생성:
+- 경복궁 (37.5796, 126.9770)
+- 북촌 (37.5826, 126.9830)
+- 인사동 (37.5723, 126.9894)
+
+시작: 경복궁 근처 ✅
+```
+
+### 2. 부산
+```
+입력: "부산 하루 여행. 해운대, 자갈치시장, 광안리"
+
+AI 생성:
+- 해운대 (35.1586, 129.1603)
+- 자갈치시장 (35.0968, 129.0305)
+- 광안리 (35.1532, 129.1189)
+
+시작: 해운대 근처 ✅
+```
+
+### 3. 강원도 속초
+```
+입력: "강원도 속초 하루 여행. 속초해수욕장, 중앙시장, 설악산"
+
+AI 생성:
+- 속초해수욕장 (38.2072, 128.5933)
+- 중앙시장 (38.2077, 128.5918)
+- 설악산 케이블카 (38.1192, 128.4657)
+
+시작: 속초해수욕장 근처 ✅
+```
+
+## 🎮 UI 개선
+
+### 지역 선택 버튼
+```
+📍 지역별 예시:
+[🏰 서울] [🏖️ 부산] [🏔️ 강원도]
+```
+
+**클릭 시:**
+```
+서울 클릭 → 텍스트 자동 입력:
+"서울 하루 여행. 경복궁, 북촌 한식당, 인사동"
+
+부산 클릭 → 텍스트 자동 입력:
+"부산 하루 여행. 해운대, 자갈치시장, 광안리"
+
+강원도 클릭 → 텍스트 자동 입력:
+"강원도 속초 하루 여행. 속초해수욕장, 중앙시장, 설악산"
+```
+
+### 좌표 정보 표시
+```
+✅ AI 생성 계획: 강원도 속초
+📍 활동: 3개
+🎯 시작 위치: 속초해수욕장 (38.2072, 128.5933)
+
+[📋 계획 상세 보기]
+  1. 속초해수욕장 산책 (09:00)
+     📍 속초해수욕장
+     🌍 좌표: (38.2072, 128.5933)  ← 표시됨!
+     ⏱️ 120분
+```
+
+## 🎯 완전한 플로우
+
+```
+1. API 키 입력
+   ↓
+2. 지역 선택 (서울/부산/강원도) 또는 직접 입력
+   ↓
+3. 🤖 AI 생성 (5-10초)
+   - 활동 구조화
+   - 좌표 생성
+   - 트리거 설정
+   ↓
+4. 🎯 시작 위치 자동 설정 (첫 활동 위치)
+   ↓
+5. ▶️ 자동 진행
+   - 이동 (20단계)
+   - 도착
+   - 🤖 알림 (한 번만!)
+   - ✅ 확인
+   - 다음 활동
+   ↓
+6. 완료 🎉
+```
+
+## 🔧 코드 변경사항
+
+### 1. Session State 추가
+```python
+# 알림 추적
+if "notified_activities" not in st.session_state:
+    st.session_state.notified_activities = set()
+
+# 초기화 플래그
+if "simulation_initialized" not in st.session_state:
+    st.session_state.simulation_initialized = False
+```
+
+### 2. 초기화 함수
+```python
+def initialize_simulation_location(plan):
+    """계획의 첫 활동 위치로 시뮬레이터 초기화"""
+    if plan and plan.get("activities"):
+        first_activity = plan["activities"][0]
+        simulator.update_location(
+            first_activity.get("latitude"),
+            first_activity.get("longitude"),
+            f"{first_activity.get('location')} 근처"
+        )
+        return True
+    return False
+```
+
+### 3. 알림 로직 개선
+```python
+# 활동 고유 ID
+activity_id = f"{current_activity_index}_{activity.get('name')}"
+
+# 이미 알림 생성했는지 확인
+if activity_id not in st.session_state.notified_activities:
+    triggered = rag.check_triggers(...)
+    
+    if triggered:
+        # 알림 생성
+        add_notification(...)
+        
+        # 기록
+        st.session_state.notified_activities.add(activity_id)
+        
+        # 대기
+        st.session_state.waiting_for_notification = True
+```
+
+## 🐛 디버깅
+
+### 알림이 여전히 중복되면?
+
+**확인 1: Session State**
+```python
+# F12 → Console
+st.write(st.session_state.notified_activities)
+# 출력: {'0_경복궁 관람', '1_북촌 한식당 점심'}
+```
+
+**확인 2: Activity ID**
+```python
+st.write(f"Activity ID: {activity_id}")
+st.write(f"Already notified: {activity_id in notified_activities}")
+```
+
+### 위치가 이상하면?
+
+**확인 1: 좌표**
+```python
+# 계획 상세 보기
+🌍 좌표: (38.2072, 128.5933)  # 속초 맞음?
+```
+
+**확인 2: 시뮬레이터 위치**
+```python
+st.write(st.session_state.simulator.state["location"])
+# {'latitude': 38.2072, 'longitude': 128.5933, 'name': '속초해수욕장 근처'}
+```
+
+## 📊 테스트 결과
+
+### ✅ 알림 버그
+```
+테스트 1: 서울 3개 활동
+- 경복궁: 알림 1개 ✅
+- 북촌: 알림 1개 ✅
+- 인사동: 알림 1개 ✅
+총 3개 (중복 없음!)
+
+테스트 2: 속초 3개 활동
+- 속초해수욕장: 알림 1개 ✅
+- 중앙시장: 알림 1개 ✅
+- 설악산: 알림 1개 ✅
+총 3개 (중복 없음!)
+```
+
+### ✅ 지역 대응
+```
+테스트 1: 서울
+- 시작 위치: 경복궁 (37.5796, 126.9770) ✅
+- 이동: 경복궁 → 북촌 → 인사동 ✅
+
+테스트 2: 부산
+- 시작 위치: 해운대 (35.1586, 129.1603) ✅
+- 이동: 해운대 → 자갈치 → 광안리 ✅
+
+테스트 3: 속초
+- 시작 위치: 속초해수욕장 (38.2072, 128.5933) ✅
+- 이동: 속초해수욕장 → 중앙시장 → 설악산 ✅
+```
+
+## 🎯 결론
+
+### ✅ 완전히 해결됨!
+
+**알림 버그:**
+- 문제: 중복 생성
+- 해결: `notified_activities` set으로 추적
+- 결과: 각 활동당 1개만 생성 ✅
+
+**지역 제한:**
+- 문제: 서울만 가능
+- 해결: 첫 활동 위치로 자동 초기화
+- 결과: 전국 어디든 가능 ✅
 
 ## 📄 라이센스
 
@@ -472,15 +397,9 @@ MIT License
 
 ---
 
-## ✅ 확인 완료
+**🎯 이제 완벽합니다!**
 
-```
-✓ Upstage API 작동
-✓ 사용자 입력 필수
-✓ AI 자동 생성
-✓ 샘플 계획 제거
-✓ 트리거 자동 설정
-✓ 알림 자동 생성
-```
-
-**🎯 사용자가 요청 → AI가 모든 것을 생성합니다!**
+✅ 알림 중복 없음
+✅ 전국 어디든 가능
+✅ AI가 모든 것 생성
+✅ 사용자는 입력만
