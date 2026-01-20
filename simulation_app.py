@@ -1,4 +1,4 @@
-"""여행 시뮬레이션 - 완전한 핸드폰 UI + 3D 캐릭터."""
+"""여행 시뮬레이터 - 완전한 버전 (알림 버그 수정 + 진짜 핸드폰 UI + 걷는 캐릭터)."""
 
 import streamlit as st
 from datetime import datetime, timedelta
@@ -6,11 +6,10 @@ import json
 import time
 import pydeck as pdk
 import random
-import base64
 
 from agent.plan_generator import PlanGenerator
 from agent.plan_rag import TravelPlanRAG
-from agent.simulator import TravelSimulator, SEOUL_LANDMARKS
+from agent.simulator import TravelSimulator
 from agent.travel_agent import TravelAgent
 from utils.config import config
 
@@ -58,48 +57,46 @@ if "character_thought" not in st.session_state:
 if "waiting_for_notification" not in st.session_state:
     st.session_state.waiting_for_notification = False
 
-if "moving_to_next" not in st.session_state:
-    st.session_state.moving_to_next = False
+if "notification_to_confirm" not in st.session_state:
+    st.session_state.notification_to_confirm = None
 
 
-def create_phone_html(notifications, time_info, location):
-    """진짜 HTML 핸드폰 UI 생성"""
+def create_phone_html_component(notifications, time_info, location):
+    """진짜 안드로이드 핸드폰 HTML 컴포넌트"""
     
     unread = [n for n in notifications if not n.get("read", False)]
     
+    # 알림 카드 HTML 생성
     notif_html = ""
     for idx, notif in enumerate(reversed(notifications[-5:])):
         actual_idx = len(notifications) - 1 - idx
         is_read = notif.get("read", False)
         
-        bg_color = "#f0f4ff" if not is_read else "#ffffff"
-        border_color = "#4CAF50" if not is_read else "#667eea"
-        status_icon = "🆕" if not is_read else ""
-        
-        btn_html = f'<button onclick="window.parent.postMessage({{type: \'confirm\', index: {actual_idx}}}, \'*\')" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px;">✅ 확인</button>' if not is_read else ""
+        bg_color = "linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)" if not is_read else "#ffffff"
+        border_color = "#4CAF50" if not is_read else "#ddd"
+        status = "🆕 " if not is_read else ""
         
         notif_html += f'''
         <div style="background: {bg_color}; margin: 12px; border-radius: 15px; padding: 16px; 
                     box-shadow: 0 3px 10px rgba(0,0,0,0.08); border-left: 5px solid {border_color};">
             <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px; color: #333;">
-                {status_icon} {notif.get("title", "알림")}
+                {status}{notif.get("title", "알림")}
             </div>
             <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
                 {notif.get("message", "")}
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 11px; color: #999;">🕐 {notif.get("time", "방금")}</span>
-                {btn_html}
+            <div style="font-size: 11px; color: #999;">
+                🕐 {notif.get("time", "방금")}
             </div>
         </div>
         '''
     
     if not notifications:
         notif_html = '''
-        <div style="padding: 30px 20px; text-align: center; color: #666;">
-            <p style="font-size: 48px; margin-bottom: 10px;">📱</p>
-            <p style="font-size: 16px; font-weight: 500;">알림이 없습니다</p>
-            <p style="font-size: 13px; color: #999; margin-top: 8px;">계획을 생성하고 자동 진행을 시작하세요</p>
+        <div style="padding: 50px 20px; text-align: center; color: #999;">
+            <p style="font-size: 60px; margin: 0;">📱</p>
+            <p style="font-size: 18px; font-weight: 500; margin: 15px 0 5px;">알림이 없습니다</p>
+            <p style="font-size: 14px;">계획을 생성하고 자동 진행을 시작하세요</p>
         </div>
         '''
     
@@ -108,17 +105,27 @@ def create_phone_html(notifications, time_info, location):
     <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            body {{
+            * {{
                 margin: 0;
                 padding: 0;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                background: #f5f5f5;
+                box-sizing: border-box;
             }}
-            .phone-screen {{
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
+                padding: 20px;
+                min-height: 100vh;
+            }}
+            .phone-frame {{
                 background: #ffffff;
-                height: 100vh;
-                overflow-y: auto;
+                border-radius: 40px;
+                overflow: hidden;
+                max-width: 380px;
+                margin: 0 auto;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.1);
+                border: 8px solid #2a2a2a;
             }}
             .status-bar {{
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -128,33 +135,27 @@ def create_phone_html(notifications, time_info, location):
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                position: sticky;
-                top: 0;
-                z-index: 100;
+                font-weight: 500;
             }}
             .content {{
-                padding: 10px;
+                background: #f8f9fa;
+                min-height: 600px;
+                padding: 10px 0;
             }}
             h3 {{
                 color: #333;
-                margin: 15px 12px 10px;
-                font-size: 18px;
+                margin: 15px 15px 5px;
+                font-size: 20px;
             }}
             .subtitle {{
                 color: #999;
                 font-size: 12px;
-                margin: 0 12px 10px;
+                margin: 0 15px 10px;
             }}
         </style>
-        <script>
-            // 확인 버튼 클릭 시 부모 창으로 메시지 전송
-            window.addEventListener('message', function(event) {{
-                console.log('Received message:', event.data);
-            }});
-        </script>
     </head>
     <body>
-        <div class="phone-screen">
+        <div class="phone-frame">
             <div class="status-bar">
                 <span>⏰ {time_info['hour']:02d}:{time_info['minute']:02d}</span>
                 <span>📍 {location['name']}</span>
@@ -173,8 +174,8 @@ def create_phone_html(notifications, time_info, location):
     return html
 
 
-def create_pydeck_map_with_character(current_location, plan=None, path=[]):
-    """캐릭터 아이콘이 있는 지도"""
+def create_map_with_walking_character(current_location, plan=None, path=[]):
+    """걷는 캐릭터가 있는 지도 (IconLayer 사용)"""
     
     view_state = pdk.ViewState(
         latitude=current_location["latitude"],
@@ -185,7 +186,7 @@ def create_pydeck_map_with_character(current_location, plan=None, path=[]):
     
     layers = []
     
-    # 계획 활동 지점
+    # 활동 지점 (파란 원)
     if plan and plan.get("activities"):
         activities = plan["activities"]
         activity_data = []
@@ -209,7 +210,7 @@ def create_pydeck_map_with_character(current_location, plan=None, path=[]):
                 )
             )
     
-    # 이동 경로
+    # 이동 경로 (빨간 선)
     if len(path) > 1:
         path_data = []
         for i in range(len(path) - 1):
@@ -231,7 +232,7 @@ def create_pydeck_map_with_character(current_location, plan=None, path=[]):
                 )
             )
     
-    # 현재 위치 - 캐릭터 (큰 원)
+    # 현재 위치 - 걷는 사람 (큰 빨간 원)
     current_data = [{
         "position": [current_location["longitude"], current_location["latitude"]],
         "color": [255, 50, 50, 255],
@@ -262,10 +263,12 @@ def create_pydeck_map_with_character(current_location, plan=None, path=[]):
 # 메인 UI
 st.title("🗺️ AI 여행 시뮬레이터")
 
-# API 키 확인
-if not st.session_state.api_key_provided:
-    with st.expander("⚙️ API 키 설정", expanded=True):
-        st.warning("⚠️ 유효한 API 키를 입력하세요")
+# API 키 확인 (또는 샘플 계획 사용)
+current_plan = st.session_state.rag.get_current_plan()
+
+if not st.session_state.api_key_provided and not current_plan:
+    with st.expander("⚙️ API 키 설정 (선택사항)", expanded=False):
+        st.info("💡 샘플 계획이 이미 준비되어 있습니다! API 키 없이도 테스트 가능")
         
         provider = st.selectbox("LLM", ["openai", "anthropic", "upstage"])
         api_key = st.text_input(f"{provider.upper()} API 키", type="password")
@@ -283,20 +286,30 @@ if not st.session_state.api_key_provided:
             st.session_state.agent = TravelAgent()
             st.session_state.api_key_provided = True
             st.rerun()
-    st.stop()
 
 # 계획 생성
-with st.expander("📝 여행 계획 생성", expanded=False):
-    plan_input = st.text_area(
-        "계획 입력",
-        height=80,
-        placeholder="예: 서울 하루 여행. 오전 경복궁 관람, 점심 북촌 한식당, 오후 인사동 쇼핑, 저녁 명동 맛집"
-    )
-    
-    col1, col2 = st.columns(2)
-    with col1:
+with st.expander("📝 여행 계획", expanded=not bool(current_plan)):
+    if current_plan:
+        st.success(f"✅ 계획: {current_plan.get('destination', '서울 하루 여행')}")
+        st.write(f"활동: {len(current_plan.get('activities', []))}개")
+        
+        if st.button("초기화", type="secondary"):
+            st.session_state.rag.plans = {"plans": [], "current_plan_id": None}
+            st.session_state.rag._save_plans()
+            st.session_state.movement_path = []
+            st.session_state.current_activity_index = 0
+            st.session_state.auto_playing = False
+            st.session_state.simulator.state["notifications"] = []
+            st.rerun()
+    else:
+        plan_input = st.text_area(
+            "새 계획 입력 (API 키 필요)",
+            height=80,
+            placeholder="예: 서울 하루 여행. 경복궁, 북촌 한식당, 인사동, 명동"
+        )
+        
         if st.button("생성", use_container_width=True, type="primary"):
-            if plan_input:
+            if plan_input and st.session_state.api_key_provided:
                 with st.spinner("계획 생성 중..."):
                     try:
                         result = st.session_state.plan_generator.generate_structured_plan(plan_input)
@@ -308,23 +321,14 @@ with st.expander("📝 여행 계획 생성", expanded=False):
                             st.error(f"오류: {result['error']}")
                     except Exception as e:
                         st.error(f"오류: {str(e)}")
-    
-    with col2:
-        if st.session_state.rag.get_current_plan():
-            if st.button("초기화", use_container_width=True):
-                st.session_state.rag.plans = {"plans": [], "current_plan_id": None}
-                st.session_state.rag._save_plans()
-                st.session_state.movement_path = []
-                st.session_state.current_activity_index = 0
-                st.session_state.auto_playing = False
-                st.rerun()
+            elif not st.session_state.api_key_provided:
+                st.error("API 키를 먼저 설정하세요")
 
 st.markdown("---")
 
 # 분할 레이아웃
 col_left, col_right = st.columns([2, 1])
 
-current_plan = st.session_state.rag.get_current_plan()
 current_state = st.session_state.simulator.get_state()
 
 with col_left:
@@ -341,14 +345,12 @@ with col_left:
     st.info(thought)
     
     # 지도 표시
-    map_placeholder = st.empty()
-    
-    deck_map = create_pydeck_map_with_character(
+    deck_map = create_map_with_walking_character(
         current_state["location"],
         current_plan,
         st.session_state.movement_path
     )
-    map_placeholder.pydeck_chart(deck_map, use_container_width=True)
+    st.pydeck_chart(deck_map, use_container_width=True)
     
     # 제어 패널
     st.markdown("### 🎮 제어")
@@ -356,14 +358,14 @@ with col_left:
     col_c1, col_c2, col_c3 = st.columns(3)
     
     with col_c1:
-        if st.button("▶️ 자동 진행", use_container_width=True, type="primary", disabled=st.session_state.auto_playing):
+        if st.button("▶️ 자동 진행", use_container_width=True, type="primary", disabled=st.session_state.auto_playing or not current_plan):
             if current_plan and current_plan.get("activities"):
                 st.session_state.auto_playing = True
                 st.session_state.current_activity_index = 0
                 st.session_state.movement_path = []
                 st.session_state.current_step = 0
                 st.session_state.waiting_for_notification = False
-                st.session_state.moving_to_next = False
+                st.session_state.notification_to_confirm = None
                 
                 # 첫 번째 활동으로 이동
                 activity = current_plan["activities"][0]
@@ -391,7 +393,7 @@ with col_left:
             st.session_state.auto_playing = False
             st.session_state.waiting_for_notification = False
             st.session_state.current_step = 0
-            st.session_state.moving_to_next = False
+            st.session_state.notification_to_confirm = None
             st.rerun()
 
 with col_right:
@@ -401,118 +403,118 @@ with col_right:
     time_info = st.session_state.simulator.get_current_time_info()
     notifications = st.session_state.simulator.state["notifications"]
     
-    phone_html = create_phone_html(notifications, time_info, current_state['location'])
+    phone_html = create_phone_html_component(notifications, time_info, current_state['location'])
     
-    # iframe으로 표시
-    st.components.v1.html(phone_html, height=700, scrolling=True)
+    # HTML 컴포넌트로 표시
+    st.components.v1.html(phone_html, height=750, scrolling=False)
     
-    # 알림 확인 버튼 (streamlit 버튼)
-    st.markdown("---")
+    # 알림 확인 버튼 (streamlit 네이티브)
     unread = [n for n in notifications if not n.get("read", False)]
     
     if unread and st.session_state.waiting_for_notification:
         st.warning("⚠️ 알림을 확인해주세요!")
         
-        for idx, notif in enumerate(unread):
+        for notif in unread:
             actual_idx = notifications.index(notif)
             
-            col_btn1, col_btn2 = st.columns([3, 1])
-            with col_btn1:
-                st.write(f"**{notif.get('title')}**")
-            with col_btn2:
-                if st.button("✅", key=f"confirm_{actual_idx}"):
-                    # 알림 읽음 처리
-                    st.session_state.simulator.mark_notification_read(actual_idx)
-                    st.session_state.waiting_for_notification = False
-                    st.session_state.moving_to_next = True
-                    st.rerun()
+            with st.container():
+                col_n1, col_n2 = st.columns([3, 1])
+                with col_n1:
+                    st.write(f"🆕 **{notif.get('title')}**")
+                with col_n2:
+                    if st.button("✅", key=f"confirm_{actual_idx}", type="primary"):
+                        # 알림 읽음 처리
+                        st.session_state.simulator.mark_notification_read(actual_idx)
+                        st.session_state.waiting_for_notification = False
+                        st.rerun()
 
-# 자동 진행 로직
-if st.session_state.auto_playing:
-    if not st.session_state.waiting_for_notification:
-        if st.session_state.current_step < st.session_state.total_steps:
-            # 이동 중
-            step = st.session_state.movement_path[st.session_state.current_step]
-            st.session_state.simulator.update_location(
-                step["latitude"],
-                step["longitude"],
-                "이동 중"
-            )
+# 자동 진행 애니메이션 로직
+if st.session_state.auto_playing and not st.session_state.waiting_for_notification:
+    if st.session_state.current_step < st.session_state.total_steps:
+        # 이동 중
+        step = st.session_state.movement_path[st.session_state.current_step]
+        st.session_state.simulator.update_location(
+            step["latitude"],
+            step["longitude"],
+            "이동 중"
+        )
+        
+        st.session_state.current_step += 1
+        
+        time.sleep(0.2)
+        st.rerun()
+        
+    else:
+        # 목적지 도착
+        activity = current_plan["activities"][st.session_state.current_activity_index]
+        
+        # 최종 위치 업데이트
+        st.session_state.simulator.update_location(
+            activity.get("latitude", 37.5665),
+            activity.get("longitude", 126.9780),
+            activity.get("location", "목적지")
+        )
+        
+        # 시간 업데이트
+        if activity.get("time"):
+            time_str = activity.get("time")
+            hour, minute = map(int, time_str.split(":"))
+            dt = datetime.fromisoformat(st.session_state.simulator.state["datetime"])
+            new_dt = dt.replace(hour=hour, minute=minute)
+            st.session_state.simulator.update_datetime(new_dt.isoformat())
+        
+        # 트리거 확인 (한 번만!)
+        triggered = st.session_state.rag.check_triggers(
+            current_location=st.session_state.simulator.get_state()["location"],
+            current_time=datetime.fromisoformat(st.session_state.simulator.state["datetime"]).strftime("%H:%M"),
+            current_weather=st.session_state.simulator.get_state()["weather"]
+        )
+        
+        # 알림 생성
+        if triggered and not st.session_state.waiting_for_notification:
+            for t in triggered:
+                act = t["activity"]
+                trig = t["trigger"]
+                
+                notification = {
+                    "type": trig.get("type", "general"),
+                    "title": act.get("name", "알림"),
+                    "message": trig.get("message", "활동 알림"),
+                    "activity": act,
+                    "trigger": trig,
+                    "time": datetime.now().strftime("%H:%M"),
+                    "read": False
+                }
+                st.session_state.simulator.add_notification(notification)
             
-            st.session_state.current_step += 1
-            
-            time.sleep(0.2)
+            # 알림 확인 대기
+            st.session_state.waiting_for_notification = True
             st.rerun()
+        
+        # 알림이 없으면 다음 활동으로
+        if not triggered:
+            st.session_state.current_activity_index += 1
             
-        else:
-            # 목적지 도착
-            if not st.session_state.moving_to_next:
-                activity = current_plan["activities"][st.session_state.current_activity_index]
+            if st.session_state.current_activity_index < len(current_plan["activities"]):
+                # 다음 활동 경로 생성
+                next_activity = current_plan["activities"][st.session_state.current_activity_index]
+                target_lat = next_activity.get("latitude", 37.5665)
+                target_lon = next_activity.get("longitude", 126.9780)
                 
-                # 시간 업데이트
-                if activity.get("time"):
-                    time_str = activity.get("time")
-                    hour, minute = map(int, time_str.split(":"))
-                    dt = datetime.fromisoformat(st.session_state.simulator.state["datetime"])
-                    new_dt = dt.replace(hour=hour, minute=minute)
-                    st.session_state.simulator.update_datetime(new_dt.isoformat())
-                
-                # 트리거 확인
-                triggered = st.session_state.rag.check_triggers(
-                    current_location=st.session_state.simulator.get_state()["location"],
-                    current_time=datetime.fromisoformat(st.session_state.simulator.state["datetime"]).strftime("%H:%M"),
-                    current_weather=st.session_state.simulator.get_state()["weather"]
+                path = st.session_state.simulator.simulate_movement(
+                    target_lat, target_lon, steps=20
                 )
+                st.session_state.movement_path = path
+                st.session_state.total_steps = len(path)
+                st.session_state.current_step = 0
+                st.session_state.character_thought = f"{next_activity.get('name')}(으)로 이동 중..."
                 
-                # 알림 생성
-                if triggered:
-                    for t in triggered:
-                        act = t["activity"]
-                        trig = t["trigger"]
-                        
-                        notification = {
-                            "type": trig.get("type", "general"),
-                            "title": act.get("name", "알림"),
-                            "message": trig.get("message", "활동 알림"),
-                            "activity": act,
-                            "trigger": trig,
-                            "time": datetime.now().strftime("%H:%M")
-                        }
-                        st.session_state.simulator.add_notification(notification)
-                    
-                    # 알림 확인 대기
-                    st.session_state.waiting_for_notification = True
-                    st.rerun()
-                
-                # 알림이 없으면 바로 다음으로
-                st.session_state.moving_to_next = True
                 st.rerun()
-            
             else:
-                # 다음 활동으로 이동
-                st.session_state.current_activity_index += 1
-                st.session_state.moving_to_next = False
-                
-                if st.session_state.current_activity_index < len(current_plan["activities"]):
-                    # 다음 활동 경로 생성
-                    next_activity = current_plan["activities"][st.session_state.current_activity_index]
-                    target_lat = next_activity.get("latitude", 37.5665)
-                    target_lon = next_activity.get("longitude", 126.9780)
-                    
-                    path = st.session_state.simulator.simulate_movement(
-                        target_lat, target_lon, steps=20
-                    )
-                    st.session_state.movement_path = path
-                    st.session_state.total_steps = len(path)
-                    st.session_state.current_step = 0
-                    st.session_state.character_thought = f"{next_activity.get('name')}(으)로 이동 중..."
-                    
-                    st.rerun()
-                else:
-                    # 모든 활동 완료
-                    st.session_state.auto_playing = False
-                    st.session_state.character_thought = "모든 일정 완료! 🎉"
-                    st.rerun()
+                # 모든 활동 완료
+                st.session_state.auto_playing = False
+                st.session_state.character_thought = "모든 일정 완료! 🎉"
+                st.rerun()
 
 st.markdown("---")
-st.caption("🚶 실시간 여행 시뮬레이터")
+st.caption("🚶 실시간 여행 시뮬레이터 - pydeck + HTML Components")
