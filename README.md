@@ -1,197 +1,294 @@
-# Enilpoc - AI 여행 플래너 & 가이드
+# 🗺️ AI 여행 시뮬레이터
 
-LLM과 RAG(검색 증강 생성) 개념을 활용한 지능형 여행 계획 도우미로, 상황 인지형 추천과 개인화된 여행 가이드를 제공합니다.
+실시간으로 위치, 시간, 날씨를 조작하며 AI 기반 여행 계획을 시뮬레이션하는 MVP 프로젝트입니다.
 
-## 개요
+## 📋 주요 기능
 
-Enilpoc은 단순한 정보 검색을 넘어서는 MVP 여행 플래너입니다:
+### 1. AI 기반 여행 계획 생성
+- 자연어로 여행 계획을 입력하면 LLM이 구조화된 계획 생성
+- 장소, 시간, 위도/경도, 트리거 조건을 포함한 상세 계획
+- 계획을 RAG 시스템에 저장하여 지능적인 검색 및 수정 가능
 
-- **상황 인지**: 날씨, 시간, 위치를 분석하여 상황에 맞는 추천 제공
-- **능동적 지원**: 필요한 정보를 파악하고 제안
-- **근거 기반 추천**: 시뮬레이션된 리뷰 데이터와 논리적 근거로 추천 설명
-- **자연스러운 대화**: 대화 전체의 맥락 유지
+### 2. 실시간 여행 시뮬레이션
+- **위치 시뮬레이션**: 위도/경도 슬라이더로 실제처럼 이동
+- **시간 시뮬레이션**: 날짜/시간을 자유롭게 조작
+- **날씨 시뮬레이션**: 날씨와 기온을 실시간으로 변경
+- 서울 주요 관광지 프리셋 지원
 
-## 주요 기능
+### 3. 스마트 알림 시스템
+- **위치 기반 트리거**: 목적지 반경 진입 시 자동 알림
+- **시간 기반 트리거**: 계획된 시간 도달 시 알림
+- **날씨 기반 트리거**: 날씨 변화 시 대안 제안
+- 모바일 UI로 알림 표시 및 관리
 
-### 1. 여행 계획 도우미
-- 자연어 기반 여행 일정 작성
-- 목적, 동행자, 기간, 선호도 고려
-- 개인화된 일정 생성
+### 4. 컨텍스트 인식 챗봇
+- 알림 클릭 시 즉시 챗봇 연결
+- 현재 위치, 시간, 날씨, 계획 정보를 자동으로 포함
+- 계획 수정 및 실시간 조언 제공
 
-### 2. 상황 인지형 가이드
-- 실시간 날씨 연동 (MVP에서는 시뮬레이션)
-- 위치 기반 추천
-- 시간대별 적절한 제안
+### 5. 계획 수정 및 업데이트
+- 자연어로 계획 수정 요청
+- RAG 시스템 자동 업데이트
+- 새로운 트리거 조건 자동 생성
 
-### 3. 지능형 추천
-- 현재 상황과 계획한 활동 분석
-- 조건이 맞지 않을 때 대안 제시
-- 추천 이유 명확하게 설명
+## 🏗️ 시스템 아키텍처
 
-## 기술 스택
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Streamlit Web UI                      │
+├───────────────┬─────────────────┬──────────────────────┤
+│   계획 생성    │   시뮬레이션     │   핸드폰 + 챗봇       │
+└───────┬───────┴─────────┬───────┴──────────┬───────────┘
+        │                 │                  │
+        ▼                 ▼                  ▼
+┌───────────────┐ ┌─────────────────┐ ┌──────────────────┐
+│ Plan Generator│ │  Simulator      │ │  Travel Agent    │
+│  (LLM)        │ │  - Location     │ │  (LLM + Tools)   │
+└───────┬───────┘ │  - Time         │ └──────────────────┘
+        │         │  - Weather      │
+        ▼         └─────────┬───────┘
+┌───────────────────────────▼─────────────────────────────┐
+│                    Travel Plan RAG                      │
+│  - 계획 저장/검색                                         │
+│  - 트리거 조건 관리                                       │
+│  - 거리 계산 (Haversine)                                │
+└─────────────────────────────────────────────────────────┘
+```
 
-- **프론트엔드**: Streamlit
-- **LLM 연동**: OpenAI / Anthropic / Upstage APIs
-- **언어**: Python 3.8+
-- **설정**: python-dotenv
+## 🚀 설치 및 실행
 
-## 설치 방법
-
-### 1. 레포지토리 클론
-
+### 1. 저장소 클론
 ```bash
-git clone https://github.com/kimkuhyun/enilpoc.git
+git clone <repository-url>
 cd enilpoc
 ```
 
 ### 2. 가상환경 생성 및 활성화
-
 ```bash
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
-### 3. 의존성 설치
-
+### 3. 패키지 설치
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. API 키 설정
-
-`.env.example`을 `.env`로 복사하고 API 키를 입력하세요:
-
-```bash
-cp .env.example .env
-```
-
-`.env` 파일을 열어서 인증 정보를 입력:
-
+### 4. 환경 변수 설정
+`.env` 파일을 생성하고 API 키를 설정하세요:
 ```env
-OPENAI_API_KEY=your_key_here
+OPENAI_API_KEY=your_openai_key
 # 또는
-ANTHROPIC_API_KEY=your_key_here
+ANTHROPIC_API_KEY=your_anthropic_key
 # 또는
-UPSTAGE_API_KEY=your_key_here
-
-LLM_PROVIDER=openai  # openai, anthropic, upstage 중 선택
-LLM_MODEL=gpt-4o-mini  # 또는 claude-sonnet-4.5, solar-mini
+UPSTAGE_API_KEY=your_upstage_key
 ```
 
-### 5. 애플리케이션 실행
-
+### 5. 앱 실행
 ```bash
-streamlit run app.py
+streamlit run simulation_app.py
 ```
 
-앱이 브라우저에서 `http://localhost:8501`로 열립니다
+## 📱 사용 방법
 
-## 프로젝트 구조
+### 1단계: 여행 계획 생성
+1. "계획 생성" 탭으로 이동
+2. 여행 계획을 자유롭게 작성
+   - 예: "내일 서울에서 하루 여행 계획해줘. 아침에 경복궁, 점심은 명동, 오후에 남산타워"
+3. "계획 생성" 버튼 클릭
+4. AI가 구조화된 계획을 생성하고 RAG에 저장
+
+### 2단계: 시뮬레이션 시작
+1. "시뮬레이션" 탭으로 이동
+2. 위치 조절:
+   - 프리셋에서 관광지 선택 또는
+   - 위도/경도 슬라이더로 직접 이동
+3. 시간 조절:
+   - 날짜/시간 직접 설정 또는
+   - "+15분", "+1시간" 버튼으로 빠른 진행
+4. 날씨 조절:
+   - 날씨 상태와 기온 설정
+5. "수동으로 트리거 확인" 버튼으로 알림 생성
+
+### 3단계: 알림 확인 및 챗봇 이용
+1. "핸드폰" 탭으로 이동
+2. 모바일 UI에서 알림 확인
+3. "챗봇" 버튼 클릭하여 AI 도우미와 대화
+4. 현재 상황에 맞는 조언 및 계획 수정
+
+## 🎯 에이전트 플로우
+
+```
+[사용자 입력]
+    ↓
+[1. 계획 생성]
+    ├─ LLM이 자연어를 구조화된 JSON으로 변환
+    ├─ 위치 정보 추출 (위도/경도)
+    ├─ 트리거 조건 생성
+    └─ RAG에 저장
+    ↓
+[2. 시뮬레이션]
+    ├─ 사용자가 위치/시간/날씨 조작
+    └─ 주기적으로 트리거 조건 확인
+    ↓
+[3. 트리거 감지]
+    ├─ 위치 반경 체크 (Haversine 거리)
+    ├─ 시간 도달 확인
+    └─ 날씨 조건 매칭
+    ↓
+[4. 알림 생성]
+    ├─ 모바일 UI에 표시
+    └─ 읽지 않은 알림 카운트
+    ↓
+[5. 챗봇 연결]
+    ├─ 컨텍스트 자동 주입
+    ├─ LLM이 상황 기반 응답 생성
+    └─ 계획 수정 가능
+    ↓
+[6. 계획 수정]
+    ├─ 수정 요청을 LLM이 처리
+    ├─ RAG 업데이트
+    └─ 새 트리거 자동 생성
+```
+
+## 🧩 주요 컴포넌트
+
+### `agent/plan_generator.py`
+- LLM을 사용하여 자연어를 구조화된 여행 계획으로 변환
+- 계획 수정 기능
+- OpenAI, Anthropic, Upstage 지원
+
+### `agent/plan_rag.py`
+- 여행 계획 저장 및 검색
+- 트리거 조건 확인 (위치/시간/날씨)
+- Haversine 거리 계산
+
+### `agent/simulator.py`
+- 위치, 시간, 날씨 시뮬레이션
+- 알림 관리
+- 서울 주요 관광지 좌표 데이터
+
+### `agent/travel_agent.py`
+- 컨텍스트 인식 대화 에이전트
+- 현재 상황 기반 추천
+- 대화 기록 관리
+
+### `simulation_app.py`
+- Streamlit 기반 메인 앱
+- 4개 탭: 계획 생성, 시뮬레이션, 핸드폰, 챗봇
+- 실시간 트리거 확인
+
+## 📊 데이터 구조
+
+### 여행 계획 JSON
+```json
+{
+  "id": "plan_20250120_143022",
+  "destination": "서울",
+  "start_date": "2025-01-21",
+  "end_date": "2025-01-21",
+  "activities": [
+    {
+      "name": "경복궁 방문",
+      "location": "경복궁",
+      "latitude": 37.5796,
+      "longitude": 126.9770,
+      "time": "09:00",
+      "duration_minutes": 120,
+      "description": "조선시대 궁궐 관람",
+      "triggers": [
+        {
+          "type": "location",
+          "latitude": 37.5796,
+          "longitude": 126.9770,
+          "radius": 0.5,
+          "message": "경복궁 근처에 도착했습니다!"
+        },
+        {
+          "type": "time",
+          "time": "09:00",
+          "message": "경복궁 방문 시간입니다"
+        }
+      ]
+    }
+  ],
+  "preferences": {
+    "interests": ["문화", "역사"],
+    "pace": "여유로운"
+  }
+}
+```
+
+## 🛠️ 기술 스택
+
+- **Frontend**: Streamlit
+- **LLM**: OpenAI GPT / Anthropic Claude / Upstage Solar
+- **Data Storage**: JSON (RAG 시스템)
+- **Geospatial**: Haversine distance calculation
+- **Python**: 3.8+
+
+## 📝 프로젝트 구조
 
 ```
 enilpoc/
-├── app.py                 # 메인 Streamlit 애플리케이션
 ├── agent/
-│   ├── __init__.py
-│   ├── travel_agent.py    # AI 에이전트 핵심 로직
-│   └── tools.py           # 에이전트 도구 (날씨, 리뷰 등)
+│   ├── plan_generator.py    # AI 계획 생성기
+│   ├── plan_rag.py          # 계획 저장/검색 RAG
+│   ├── simulator.py         # 여행 시뮬레이터
+│   ├── travel_agent.py      # 대화 에이전트
+│   └── tools.py             # 도구 함수
 ├── utils/
-│   ├── __init__.py
-│   ├── config.py          # 설정 관리
-│   └── prompts.py         # LLM 프롬프트 템플릿
-├── .streamlit/
-│   └── config.toml        # Streamlit 테마 설정
-├── .env.example           # 환경 변수 템플릿
-├── requirements.txt       # Python 의존성
+│   ├── config.py            # 설정 관리
+│   └── prompts.py            # 프롬프트 템플릿
+├── simulation_app.py         # 메인 시뮬레이션 앱
+├── travel_plans.json         # 계획 저장소 (자동 생성)
+├── requirements.txt
+├── .env                      # API 키 (생성 필요)
 └── README.md
 ```
 
-## 사용 예시
+## 🎮 MVP 특징
 
-### 여행 계획하기
+이 프로젝트는 **시뮬레이션 중심 MVP**입니다:
 
-```
-사용자: 서울에 3일 동안 여행 가려고 해요
-봇: 좋아요! 완벽한 여행을 계획하기 위해 몇 가지 알려주세요:
-- 언제 방문하실 계획인가요?
-- 혼자 여행하시나요, 아니면 동행자가 있나요?
-- 주요 관심사가 무엇인가요? (문화, 음식, 자연 등)
-```
+- ✅ **완전한 에이전트 기능**: RAG, 계획 생성, 트리거 시스템 모두 실제 구현
+- ✅ **실시간 조작**: 위치, 시간, 날씨를 자유롭게 변경하며 테스트
+- 📱 **모바일 UI 시뮬레이션**: 실제 핸드폰 알림처럼 표시
+- 🔔 **스마트 트리거**: 위치/시간/날씨 기반 자동 알림
+- 💬 **컨텍스트 챗봇**: 현재 상황을 이해하는 AI 도우미
 
-### 추천 받기
+### 실제 앱과의 차이점
+- 실제 GPS 대신 슬라이더로 위치 조작
+- 실제 시간 대신 시뮬레이션 시간 사용
+- 실제 API 대신 시뮬레이션 데이터
+- 핸드폰 연동 대신 웹 UI로 시뮬레이션
 
-```
-사용자: 오늘 뭐 할까요?
-봇: [현재 날씨와 시간 확인]
-현재 비가 오고 오후라서 다음을 추천드려요:
-- 국립박물관 (1.2km 거리) - 리뷰에 따르면 비 오는 날 
-  완벽하고 평일 오후는 덜 붐빕니다
-- 아늑한 카페 (500m 거리) - 혼자 여행하기 좋은 분위기
-```
+## 🔮 향후 개선 사항
 
-## MVP 제한사항
+1. **실제 API 통합**
+   - Google Maps API
+   - OpenWeatherMap API
+   - 실제 리뷰 데이터 (Naver, Kakao)
 
-이것은 2주 MVP 데모이며 시뮬레이션 데이터를 사용합니다:
+2. **모바일 앱 개발**
+   - React Native / Flutter
+   - 실제 GPS 연동
+   - 푸시 알림
 
-- 날씨 데이터는 랜덤 생성 (실제 API 아님)
-- 리뷰는 목 데이터베이스 사용 (실제 RAG 아님)
-- 위치 서비스 시뮬레이션
-- 데이터베이스 없음 (영구 저장 없음)
+3. **고급 RAG**
+   - Vector DB (Pinecone, Weaviate)
+   - 임베딩 기반 검색
+   - 더 정교한 컨텍스트 관리
 
-## 설정
+4. **다중 사용자 지원**
+   - 데이터베이스 연동
+   - 사용자 인증
+   - 계획 공유 기능
 
-### 환경 변수
+## 📄 라이센스
 
-| 변수 | 설명 | 필수 여부 |
-|------|------|-----------|
-| `OPENAI_API_KEY` | OpenAI API 키 | OpenAI 사용 시 필수 |
-| `ANTHROPIC_API_KEY` | Anthropic API 키 | Anthropic 사용 시 필수 |
-| `UPSTAGE_API_KEY` | Upstage API 키 | Upstage 사용 시 필수 |
-| `LLM_PROVIDER` | LLM 제공자 (`openai`, `anthropic`, `upstage`) | 필수 |
-| `LLM_MODEL` | 모델 이름 | 선택 (기본값: gpt-4o-mini) |
-| `LLM_TEMPERATURE` | 응답 온도 | 선택 (기본값: 0.7) |
-| `MAX_TOKENS` | 응답 최대 토큰 | 선택 (기본값: 2000) |
+MIT License
 
-### 테마 색상
+## 👥 기여
 
-애플리케이션은 커스텀 색상 팔레트를 사용합니다:
-
-- 주 색상: `#A8DF8E` (연한 녹색)
-- 배경: `#F0FFDF` (밝은 녹색)
-- 보조 배경: `#FFD8DF` (연한 분홍)
-- 강조: `#FFAAB8` (부드러운 분홍)
-
-## 프로덕션 로드맵
-
-- [ ] 실제 날씨 API 연동 (OpenWeatherMap 등)
-- [ ] 리뷰 RAG용 벡터 데이터베이스 (Pinecone, Weaviate)
-- [ ] 실제 위치 서비스 (Google Places API)
-- [ ] 사용자 인증 및 여행 저장
-- [ ] 다국어 지원
-- [ ] 모바일 최적화 UI
-- [ ] 예약 서비스 연동
-
-## API 키 발급
-
-### OpenAI
-https://platform.openai.com/api-keys
-
-### Anthropic
-https://console.anthropic.com/
-
-### Upstage
-1. https://console.upstage.ai/ 접속
-2. 회원가입 후 로그인
-3. API Keys 메뉴 선택
-4. "Create New Key" 버튼 클릭
-5. 생성된 키 복사 및 안전하게 보관
-
-## 문의
-
-프로젝트 링크: [https://github.com/kimkuhyun/enilpoc](https://github.com/kimkuhyun/enilpoc)
-
-## 감사의 말
-
-- Streamlit 프레임워크
-- OpenAI / Anthropic / Upstage LLM API
-- [ColorHunt](https://colorhunt.co/palette/a8df8ef0ffdfffd8dfffaab8) 색상 팔레트
+이슈와 PR은 언제나 환영합니다!
