@@ -1,237 +1,349 @@
-# AI 여행 시뮬레이터 - 실시간 이동 애니메이션
+# 🗺️ AI 여행 시뮬레이터
 
-pydeck 2D 지도에서 실시간으로 이동하는 모습을 보며 안드로이드 핸드폰에서 알림을 받는 여행 시뮬레이터입니다.
+**실시간 이동 애니메이션 + 진짜 안드로이드 핸드폰 UI**
 
-## 🎯 주요 기능
+pydeck 2D 지도에서 걷는 캐릭터와 안드로이드 핸드폰 화면을 보며 여행하는 시뮬레이터입니다.
+
+## ✨ 주요 기능
 
 ### 1. 실시간 이동 애니메이션 🚶
-- **20단계 부드러운 이동**: 목적지까지 20단계로 나누어 이동
-- **빨리감기 속도**: 0.2초 간격으로 위치 업데이트
-- **경로 표시**: 빨간 선으로 이동 경로 그리기
-- **캐릭터 표시**: 큰 빨간 원으로 현재 위치 표시
+- 20단계 부드러운 이동 (0.2초 간격)
+- 빨간 선으로 이동 경로 표시
+- 큰 빨간 원으로 현재 위치 표시
 
-### 2. 안드로이드 핸드폰 UI 📱
+### 2. 진짜 안드로이드 핸드폰 UI 📱
 ```
-┌────────────────────┐
-│ ⏰ 14:30 📍 경복궁 🔋│ ← 상태바
-├────────────────────┤
-│                    │
-│ 🔔 알림 (2 / 5)   │
-│                    │
-│ 🆕 경복궁 관람     │
-│ 경복궁에 도착했습니다│
-│ 🕐 14:30          │
-│ [✅ 확인]         │
-│                    │
-│ 점심 식사          │
-│ 북촌 한식당...     │
-│ 🕐 12:00          │
-│                    │
-└────────────────────┘
-```
-
-### 3. 자동 진행 흐름
-```
-[▶️ 자동 진행] 클릭
-    ↓
-[1단계] 현재 위치에서 첫 활동 지점까지 20단계 경로 생성
-    ↓
-[2-21단계] 0.2초마다 한 단계씩 이동 (빨리감기)
-    ├─ 지도에 빨간 점 이동
-    ├─ 경로 선 그리기
-    └─ 말풍선: "경복궁으로 이동 중..."
-    ↓
-[도착]
-    ├─ 시간 업데이트
-    ├─ 트리거 확인
-    └─ 알림 생성 → ⏸ 일시 중지
-    ↓
-[사용자가 ✅ 확인 클릭]
-    ↓
-[다음 활동으로 이동]
-    ↓
-[반복...]
+┌─────────────────────────┐
+│ ⏰ 14:30 📍 경복궁 🔋 100% │ ← 상태바
+├─────────────────────────┤
+│                         │
+│ 🔔 알림 (2 / 5)        │
+│                         │
+│ ┌─────────────────────┐ │
+│ │ 🆕 경복궁 관람      │ │
+│ │ 경복궁에 도착했습니다 │ │
+│ │ 🕐 14:30           │ │
+│ └─────────────────────┘ │
+│                         │
+│ ┌─────────────────────┐ │
+│ │ 점심 식사          │ │
+│ │ 북촌 한식당...      │ │
+│ │ 🕐 12:00           │ │
+│ └─────────────────────┘ │
+└─────────────────────────┘
 ```
 
-## 🚀 설치 및 실행
+**진짜 HTML/CSS로 구현:**
+- 그라데이션 배경
+- 박스 그림자
+- 부드러운 border-radius
+- 📱 이모지 아이콘
 
-### 1. 저장소 클론
+### 3. 샘플 계획 제공 ⭐
+**API 키 없이도 바로 테스트 가능!**
+
+```json
+{
+  "activities": [
+    {"name": "경복궁 관람", "time": "09:00"},
+    {"name": "북촌 한옥마을 산책", "time": "11:30"},
+    {"name": "북촌 한식당 점심", "time": "12:30"},
+    {"name": "인사동 쇼핑", "time": "14:00"},
+    {"name": "남산타워 전망대", "time": "16:00"},
+    {"name": "명동 맛집 저녁", "time": "18:30"}
+  ]
+}
+```
+
+## 🚀 빠른 시작
+
+### 1. 설치
 ```bash
 git clone https://github.com/kimkuhyun/enilpoc.git
 cd enilpoc
-```
-
-### 2. 가상환경 활성화 & 패키지 설치
-```powershell
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-### 3. 실행
-```powershell
+### 2. 실행
+```bash
 streamlit run simulation_app.py
 ```
 
-### 4. 브라우저 접속
+### 3. 브라우저 접속
 **http://localhost:8501**
 
-## 📝 사용 방법
-
-### 1단계: API 키 설정
-- OpenAI, Anthropic, 또는 Upstage 선택
-- API 키 입력
-
-### 2단계: 계획 생성
-```
-입력 예시:
-"서울 하루 여행. 오전 경복궁 관람, 점심 북촌 한식당, 
-오후 인사동 쇼핑, 저녁 남산타워 전망대, 밤 명동 맛집"
-```
-
-**AI가 자동 생성:**
-- 각 장소의 위도/경도
-- 시간 배정
-- 음식점, 관광명소 구분
-- 트리거 조건
-
-### 3단계: 자동 진행 시작
-1. **"▶️ 자동 진행"** 버튼 클릭
+### 4. 바로 테스트!
+샘플 계획이 이미 준비되어 있습니다:
+1. "▶️ 자동 진행" 버튼 클릭
 2. 지도에서 빨간 점이 움직이는 것 확인
-3. 0.2초마다 한 칸씩 이동 (총 20단계)
-4. 도착하면 알림 발생
+3. 핸드폰 화면에서 알림 확인
+4. ✅ 버튼 클릭 → 다음 활동 시작
 
-### 4단계: 알림 확인
-1. 오른쪽 안드로이드 화면에 🆕 알림 표시
-2. **"✅ 확인"** 버튼 클릭
-3. 자동으로 다음 활동 시작
+## 📋 사용 방법
 
-## 🔧 기술 스택
-
-- **Frontend**: Streamlit
-- **지도**: pydeck (ScatterplotLayer, LineLayer)
-- **LLM**: OpenAI / Anthropic / Upstage
-- **상태 관리**: Streamlit Session State
-- **애니메이션**: st.rerun() + time.sleep()
-
-## 📦 주요 파일
-
-### simulation_app.py (410줄)
-```python
-# 핵심 함수
-create_pydeck_map()      # 2D 지도 생성
-                         # - 활동 지점 (파란 원)
-                         # - 이동 경로 (빨간 선)
-                         # - 현재 위치 (큰 빨간 원)
-
-# 애니메이션 로직 (페이지 하단)
-if auto_playing:
-    # 20단계 중 현재 단계로 이동
-    step = movement_path[current_step]
-    simulator.update_location(step)
-    
-    # 0.2초 대기
-    time.sleep(0.2)
-    
-    # 다음 단계
-    current_step += 1
-    st.rerun()
+### 방법 1: 샘플 계획으로 테스트 (권장)
+```
+1. streamlit run simulation_app.py
+2. "▶️ 자동 진행" 클릭
+3. 끝! (API 키 불필요)
 ```
 
-### agent/plan_generator.py
-- 음식점, 관광명소 포함 계획 생성
-- 시간대별 적절한 배치
+### 방법 2: 새 계획 생성
+```
+1. API 키 설정 (OpenAI/Anthropic/Upstage)
+2. 계획 입력: "서울 하루 여행. 경복궁, 북촌 한식당, 인사동"
+3. "생성" 클릭
+4. "▶️ 자동 진행" 클릭
+```
 
-### agent/simulator.py
-- `simulate_movement()`: 20단계 경로 생성
-- 알림 관리
+## 🛠️ 기술 스택
 
-## ✨ 주요 개선 사항
+- **Frontend**: Streamlit + HTML/CSS (Components)
+- **지도**: pydeck (Deck.gl)
+  - ScatterplotLayer: 활동 지점, 현재 위치
+  - LineLayer: 이동 경로
+- **LLM**: OpenAI / Anthropic / Upstage (선택사항)
+- **상태 관리**: Streamlit Session State
+- **애니메이션**: time.sleep() + st.rerun()
 
-### 문제 해결
+## 🐛 버그 수정
 
-#### 1. ❌ 깜빡임 문제
-**원인**: 매 프레임마다 st.rerun() 호출
-**해결**: 단계별로 rerun, time.sleep(0.2)로 속도 조절
+### ❌ 이전 문제
+1. **알림 확인 버튼**: 클릭하면 새 알림이 계속 생성됨
+2. **핸드폰 UI**: 제대로 렌더링 안 됨
+3. **캐릭터**: 너무 작아서 안 보임
 
-#### 2. ❌ 안드로이드 화면 안 보임
-**원인**: HTML/CSS가 streamlit에서 제대로 렌더링 안 됨
-**해결**: `st.container` + `st.success/info`로 순수 streamlit 컴포넌트 사용
+### ✅ 해결 방법
+1. **알림 버그**: `waiting_for_notification` 플래그로 중복 생성 방지
+   ```python
+   # 트리거 확인 (한 번만!)
+   if triggered and not st.session_state.waiting_for_notification:
+       for t in triggered:
+           add_notification(...)
+       st.session_state.waiting_for_notification = True
+   ```
 
-#### 3. ❌ 사람 캐릭터 안 보임
-**원인**: radius가 너무 작음 (80 → 200)
-**해결**: ScatterplotLayer radius를 200으로 증가
+2. **핸드폰 UI**: `st.components.v1.html()` 사용
+   ```python
+   phone_html = create_phone_html_component(...)
+   st.components.v1.html(phone_html, height=750)
+   ```
 
-### 애니메이션 로직
+3. **캐릭터**: ScatterplotLayer radius=200 (크고 명확)
+
+## 📱 안드로이드 UI 구조
+
+```html
+<body>
+  <div class="phone-frame">      <!-- 검은 테두리 -->
+    <div class="status-bar">     <!-- 상태바 (그라데이션) -->
+      ⏰ 14:30 | 📍 경복궁 | 🔋 100%
+    </div>
+    <div class="content">        <!-- 알림 영역 -->
+      <div class="notification"> <!-- 알림 카드 -->
+        🆕 경복궁 관람
+        경복궁에 도착했습니다!
+        🕐 14:30
+      </div>
+    </div>
+  </div>
+</body>
+```
+
+**CSS 특징:**
+- `linear-gradient`: 그라데이션 배경
+- `box-shadow`: 입체감
+- `border-radius`: 부드러운 모서리
+- 반응형 디자인
+
+## 🎯 애니메이션 로직
 
 ```python
-# 이전 (문제)
-for step in path:
-    update_location(step)
-    time.sleep(0.15)
-    if i % 3 == 0:  # 3프레임마다
-        st.rerun()  # 너무 자주 rerun
+# 1. 경로 생성 (20단계)
+path = simulator.simulate_movement(target_lat, target_lon, steps=20)
 
-# 수정 (해결)
-if current_step < total_steps:
-    step = path[current_step]
-    update_location(step)
-    current_step += 1
+# 2. 단계별 이동
+for step in path:
+    simulator.update_location(step)
+    time.sleep(0.2)  # 0.2초 대기
+    st.rerun()       # 화면 갱신
+
+# 3. 도착 → 알림 확인
+if triggered:
+    add_notification(...)
+    waiting_for_notification = True  # 일시 중지
     
-    time.sleep(0.2)  # 단계마다
-    st.rerun()  # 정확히 필요할 때만
+# 4. 사용자가 ✅ 클릭
+mark_notification_read(...)
+waiting_for_notification = False  # 재개
+
+# 5. 다음 활동으로
+current_activity_index += 1
+```
+
+## 📊 파일 구조
+
+```
+enilpoc/
+├── simulation_app.py (521줄)
+│   ├── create_phone_html_component()  # 핸드폰 UI HTML 생성
+│   ├── create_map_with_walking_character()  # 지도 + 캐릭터
+│   └── 자동 진행 로직 (페이지 하단)
+│
+├── travel_plans.json (샘플 계획)
+│
+├── agent/
+│   ├── plan_generator.py  # LLM 계획 생성
+│   ├── plan_rag.py        # 트리거 관리
+│   └── simulator.py       # 위치/시간/알림 관리
+│
+└── requirements.txt
+    ├── streamlit>=1.30.0
+    ├── pydeck>=0.8.0
+    └── openai/anthropic/upstage (선택)
+```
+
+## 💡 주요 개선 사항
+
+### Before → After
+
+#### 알림 시스템
+```python
+# Before (버그)
+def check_triggers():
+    triggered = rag.check_triggers(...)
+    if triggered:
+        add_notification(...)  # 계속 생성됨!
+    st.rerun()
+
+# After (수정)
+def check_triggers():
+    if not waiting_for_notification:  # 플래그 확인!
+        triggered = rag.check_triggers(...)
+        if triggered:
+            add_notification(...)
+            waiting_for_notification = True  # 중복 방지
+```
+
+#### 핸드폰 UI
+```python
+# Before (작동 안 함)
+st.markdown('<div class="phone">...</div>')  # CSS 제한적
+
+# After (작동함!)
+html = """
+<!DOCTYPE html>
+<html>
+  <style>
+    .phone-frame { ... }  # 완전한 CSS
+  </style>
+  <body>...</body>
+</html>
+"""
+st.components.v1.html(html, height=750)  # 완벽!
 ```
 
 ## 🎮 버튼 설명
 
-- **▶️ 자동 진행**: 계획의 모든 활동을 순차적으로 자동 실행
-- **⏸️ 정지**: 현재 위치에서 이동 중단
-- **🔄 초기화**: 모든 상태 초기화 (경로, 알림 등)
+- **▶️ 자동 진행**: 모든 활동 자동 실행
+- **⏸️ 정지**: 현재 위치에서 중단
+- **🔄 초기화**: 경로/알림 모두 삭제
+- **✅ 확인** (핸드폰): 알림 읽음 처리 → 다음 활동
 
-## 📱 안드로이드 UI 특징
+## 🔍 문제 해결
 
-### 상태바
-- **⏰ 시간**: 현재 시뮬레이션 시간
-- **📍 위치**: 현재 위치 이름
-- **🔋 배터리**: 항상 100% (시뮬레이션)
+### 앱이 안 켜지면?
+```bash
+# 1. 가상환경 확인
+.\venv\Scripts\Activate.ps1
 
-### 알림 카드
-- **🆕 새 알림**: 초록색 배경 + ✅ 확인 버튼
-- **읽은 알림**: 파란색 배경 + 시간 표시
+# 2. 패키지 재설치
+pip install -r requirements.txt
 
-## 🐛 문제 해결
+# 3. 포트 변경
+streamlit run simulation_app.py --server.port 8502
+```
 
 ### 지도가 안 보이면?
 1. 브라우저 콘솔 확인 (F12)
-2. pydeck 버전 확인: `pip show pydeck`
-3. streamlit 재시작
+2. `pip show pydeck` 버전 확인
+3. 인터넷 연결 확인 (pydeck은 온라인 필요)
 
 ### 알림이 안 생기면?
-1. 계획이 제대로 생성되었는지 확인
-2. 트리거 조건이 있는지 확인
-3. 시간과 위치가 맞는지 확인
+1. `travel_plans.json` 확인
+2. 트리거 조건 확인 (time/location)
+3. 개발자 도구 콘솔 에러 확인
 
 ### 이동이 안 되면?
-1. "▶️ 자동 진행" 버튼 클릭했는지 확인
-2. Session State 확인: `st.session_state.auto_playing`
-3. 계획에 활동이 있는지 확인
+1. 샘플 계획이 로드되었는지 확인
+2. "▶️ 자동 진행" 버튼 클릭했는지 확인
+3. `st.session_state.auto_playing` 상태 확인
 
-## 📊 성능
+## 📈 성능
 
 - **20단계 이동**: 약 4초 (20 × 0.2초)
-- **지도 업데이트**: 단계마다 1회
-- **메모리 사용**: 경로 데이터 저장 (경량)
+- **메모리**: ~50MB (경로 데이터)
+- **CPU**: 낮음 (단순 위치 업데이트)
+- **네트워크**: pydeck 타일 로딩만 (가벼움)
 
-## 🔮 향후 개선
+## 🔮 향후 계획
 
-1. **더 부드러운 애니메이션**: 60 FPS
-2. **사람 아이콘**: 실제 걷는 애니메이션
-3. **실제 경로**: Google Maps API 연동
-4. **사운드**: 알림 소리 추가
+1. ✅ ~~알림 버그 수정~~
+2. ✅ ~~진짜 핸드폰 UI~~
+3. ⏳ 걷는 애니메이션 (GIF)
+4. ⏳ 실제 경로 (Google Maps API)
+5. ⏳ 사운드 효과
 
 ## 📄 라이센스
 
 MIT License
 
-## 🙋‍♂️ 문의
+## 🙋 문의
 
-- GitHub Issues: [kimkuhyun/enilpoc](https://github.com/kimkuhyun/enilpoc/issues)
+- GitHub: [kimkuhyun/enilpoc](https://github.com/kimkuhyun/enilpoc)
+- Issues: [문제 보고](https://github.com/kimkuhyun/enilpoc/issues)
+
+---
+
+## 💻 개발자 노트
+
+### 핵심 기술 결정
+
+#### 1. 왜 pydeck?
+- ✅ Streamlit 네이티브 지원
+- ✅ Deck.gl의 강력한 레이어 시스템
+- ✅ 가볍고 빠름
+- ❌ 3D 애니메이션 제한적
+
+#### 2. 왜 HTML Component?
+- ✅ 완전한 CSS 제어
+- ✅ 그라데이션, 그림자 가능
+- ✅ 반응형 디자인
+- ❌ Python과 양방향 통신 제한
+
+#### 3. 왜 Session State?
+- ✅ 간단한 상태 관리
+- ✅ 자동 직렬화
+- ❌ 복잡한 객체는 주의
+
+### 디버깅 팁
+
+```python
+# 1. Session State 확인
+st.write(st.session_state)
+
+# 2. 알림 상태 확인
+st.write(st.session_state.simulator.state["notifications"])
+
+# 3. 경로 확인
+st.write(st.session_state.movement_path)
+
+# 4. 플래그 확인
+st.write(f"auto_playing: {st.session_state.auto_playing}")
+st.write(f"waiting: {st.session_state.waiting_for_notification}")
+```
+
+---
+
+**🎉 완성! API 키 없이도 바로 테스트하세요!**
