@@ -1,4 +1,4 @@
-"""여행 시뮬레이션 MVP - Streamlit 앱."""
+"""여행 시뮬레이션 MVP - Streamlit 앱 (이모지 제거, 간소화)."""
 
 import streamlit as st
 from datetime import datetime, timedelta
@@ -13,7 +13,6 @@ from utils.config import config
 # 페이지 설정
 st.set_page_config(
     page_title="여행 시뮬레이터 AI",
-    page_icon="🗺️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -21,51 +20,26 @@ st.set_page_config(
 # 사용자 정의 CSS
 st.markdown("""
     <style>
-    .phone-screen {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 30px;
-        padding: 30px 20px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        margin: 20px auto;
-        max-width: 400px;
-    }
     .notification-card {
         background: white;
-        border-radius: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
         padding: 15px;
         margin: 10px 0;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: transform 0.2s;
     }
-    .notification-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    }
-    .notification-badge {
-        background: #ff4444;
-        color: white;
-        border-radius: 50%;
-        padding: 5px 10px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-    .activity-card {
-        background: #f8f9fa;
+    .notification-card.unread {
         border-left: 4px solid #667eea;
-        padding: 15px;
-        margin: 10px 0;
+        background: #f8f9ff;
+    }
+    .scenario-button {
+        background: #667eea;
+        color: white;
+        padding: 10px 20px;
         border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        margin: 5px;
     }
-    .status-indicator {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        margin-right: 8px;
-    }
-    .status-active { background: #4CAF50; }
-    .status-pending { background: #FFC107; }
-    .status-completed { background: #9E9E9E; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -94,14 +68,17 @@ if "api_key_provided" not in st.session_state:
 if "last_trigger_check" not in st.session_state:
     st.session_state.last_trigger_check = datetime.now()
 
+if "auto_play" not in st.session_state:
+    st.session_state.auto_play = False
+
 
 # 사이드바 - 설정 및 제어
 with st.sidebar:
-    st.title("🗺️ 여행 시뮬레이터")
+    st.title("여행 시뮬레이터")
     st.markdown("---")
     
     # API 키 설정
-    st.subheader("⚙️ 설정")
+    st.subheader("설정")
     
     provider = st.selectbox(
         "LLM 제공자",
@@ -132,7 +109,7 @@ with st.sidebar:
     st.markdown("---")
     
     # 계획 관리
-    st.subheader("📋 여행 계획 관리")
+    st.subheader("여행 계획 관리")
     
     current_plan = st.session_state.rag.get_current_plan()
     
@@ -152,7 +129,7 @@ with st.sidebar:
     st.markdown("---")
     
     # 시뮬레이션 초기화
-    st.subheader("🔄 시뮬레이션 제어")
+    st.subheader("시뮬레이션 제어")
     
     if st.button("시뮬레이션 초기화"):
         st.session_state.simulator = TravelSimulator()
@@ -166,14 +143,14 @@ with st.sidebar:
 
 
 # 메인 콘텐츠
-st.title("🗺️ AI 여행 시뮬레이터")
+st.title("AI 여행 시뮬레이터")
 
 if not st.session_state.api_key_provided:
-    st.warning("⚠️ 사이드바에서 API 키를 입력하여 시작하세요")
+    st.warning("사이드바에서 API 키를 입력하여 시작하세요")
     st.stop()
 
 # 탭 생성
-tab1, tab2, tab3, tab4 = st.tabs(["📝 계획 생성", "🎮 시뮬레이션", "📱 핸드폰", "💬 챗봇"])
+tab1, tab2, tab3, tab4 = st.tabs(["계획 생성", "시뮬레이션", "핸드폰", "챗봇"])
 
 # 탭 1: 계획 생성
 with tab1:
@@ -186,10 +163,10 @@ with tab1:
             "여행 계획",
             height=150,
             placeholder="예: 내일 서울에서 하루 여행을 계획하고 있어요. 아침에 경복궁을 방문하고, "
-                       "점심은 명동에서 먹고, 오후에는 남산타워에 가고 싶어요. 저녁에는 홍대에서 식사하려고 해요."
+                       "점심은 명동에서 먹고, 오후에는 남산타워에 가고 싶어요."
         )
         
-        submitted = st.form_submit_button("🚀 계획 생성")
+        submitted = st.form_submit_button("계획 생성")
         
         if submitted and plan_input:
             with st.spinner("AI가 계획을 생성하는 중..."):
@@ -201,7 +178,7 @@ with tab1:
                         with st.expander("응답 확인"):
                             st.code(result["raw_response"])
                 else:
-                    st.success("✅ 계획이 생성되었습니다!")
+                    st.success("계획이 생성되었습니다!")
                     st.json(result)
     
     # 계획 수정
@@ -224,142 +201,163 @@ with tab1:
                 if "error" in result:
                     st.error(f"오류: {result['error']}")
                 else:
-                    st.success("✅ 계획이 수정되었습니다!")
+                    st.success("계획이 수정되었습니다!")
                     st.json(result)
                     st.rerun()
 
-# 탭 2: 시뮬레이션
+# 탭 2: 시뮬레이션 (간소화)
 with tab2:
     st.header("여행 시뮬레이션 제어판")
+    
+    # 빠른 시나리오 버튼
+    st.subheader("빠른 시나리오")
+    st.write("계획의 각 활동 위치로 바로 이동할 수 있습니다")
+    
+    if current_plan and current_plan.get("activities"):
+        cols = st.columns(min(3, len(current_plan["activities"])))
+        
+        for idx, activity in enumerate(current_plan["activities"][:6]):  # 최대 6개만 표시
+            col_idx = idx % 3
+            with cols[col_idx]:
+                if st.button(
+                    f"{activity.get('name', '활동')}",
+                    key=f"scenario_{idx}",
+                    use_container_width=True
+                ):
+                    # 활동 위치로 이동
+                    st.session_state.simulator.update_location(
+                        activity.get("latitude", 37.5665),
+                        activity.get("longitude", 126.9780),
+                        activity.get("location", "위치")
+                    )
+                    
+                    # 활동 시간으로 설정
+                    if activity.get("time"):
+                        time_str = activity.get("time")
+                        hour, minute = map(int, time_str.split(":"))
+                        dt = datetime.fromisoformat(st.session_state.simulator.state["datetime"])
+                        new_dt = dt.replace(hour=hour, minute=minute)
+                        st.session_state.simulator.update_datetime(new_dt.isoformat())
+                    
+                    st.rerun()
+    else:
+        st.info("계획을 먼저 생성하세요")
+    
+    st.markdown("---")
+    
+    # 자동 재생 모드
+    st.subheader("자동 재생")
+    
+    col_auto1, col_auto2 = st.columns(2)
+    
+    with col_auto1:
+        if st.button("계획 따라 자동 진행", use_container_width=True):
+            if current_plan and current_plan.get("activities"):
+                st.session_state.auto_play = True
+                st.success("자동 재생 시작!")
+            else:
+                st.warning("계획이 없습니다")
+    
+    with col_auto2:
+        if st.button("자동 재생 중지", use_container_width=True):
+            st.session_state.auto_play = False
+            st.info("자동 재생 중지")
+    
+    st.markdown("---")
+    
+    # 수동 제어 (간소화)
+    st.subheader("수동 제어")
     
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.subheader("📍 위치 제어")
+        st.write("**위치 제어**")
         
-        # 위치 선택
+        # 위치 프리셋
         location_preset = st.selectbox(
             "빠른 위치 선택",
-            ["직접 입력"] + list(SEOUL_LANDMARKS.keys())
+            ["현재 위치 유지"] + list(SEOUL_LANDMARKS.keys()),
+            key="location_select"
         )
         
-        if location_preset != "직접 입력":
-            preset = SEOUL_LANDMARKS[location_preset]
-            default_lat = preset["lat"]
-            default_lon = preset["lon"]
-            location_name = location_preset
-        else:
-            default_lat = st.session_state.simulator.state["location"]["latitude"]
-            default_lon = st.session_state.simulator.state["location"]["longitude"]
-            location_name = st.session_state.simulator.state["location"]["name"]
-        
-        # 위도/경도 슬라이더
-        latitude = st.slider(
-            "위도",
-            min_value=37.4,
-            max_value=37.7,
-            value=default_lat,
-            step=0.0001,
-            format="%.4f"
-        )
-        
-        longitude = st.slider(
-            "경도",
-            min_value=126.8,
-            max_value=127.2,
-            value=default_lon,
-            step=0.0001,
-            format="%.4f"
-        )
-        
-        if location_preset == "직접 입력":
-            location_name = st.text_input("위치 이름", value=location_name)
-        
-        if st.button("위치 업데이트"):
-            st.session_state.simulator.update_location(latitude, longitude, location_name)
-            st.success(f"위치가 {location_name}으로 업데이트되었습니다")
+        if location_preset != "현재 위치 유지":
+            if st.button("위치 이동", use_container_width=True):
+                preset = SEOUL_LANDMARKS[location_preset]
+                st.session_state.simulator.update_location(
+                    preset["lat"],
+                    preset["lon"],
+                    location_preset
+                )
+                st.success(f"{location_preset}(으)로 이동")
+                st.rerun()
         
         # 현재 위치 표시
-        st.info(f"현재 위치: {st.session_state.simulator.state['location']['name']}\n"
-                f"위도: {st.session_state.simulator.state['location']['latitude']:.4f}, "
-                f"경도: {st.session_state.simulator.state['location']['longitude']:.4f}")
+        current_loc = st.session_state.simulator.state['location']
+        st.caption(f"현재: {current_loc['name']}")
+        st.caption(f"좌표: {current_loc['latitude']:.4f}, {current_loc['longitude']:.4f}")
     
     with col2:
-        st.subheader("⏰ 시간 제어")
+        st.write("**시간 제어**")
         
-        # 날짜 선택
-        current_dt = datetime.fromisoformat(st.session_state.simulator.state["datetime"])
-        
-        date_input = st.date_input("날짜", value=current_dt.date())
-        time_input = st.time_input("시간", value=current_dt.time())
-        
-        if st.button("시간 업데이트"):
-            new_dt = datetime.combine(date_input, time_input)
-            st.session_state.simulator.update_datetime(new_dt.isoformat())
-            st.success(f"시간이 업데이트되었습니다")
-        
-        # 빠른 시간 진행
-        st.markdown("빠른 시간 진행:")
-        col_t1, col_t2, col_t3 = st.columns(3)
-        
-        with col_t1:
-            if st.button("+15분"):
+        # 시간 빠른 진행
+        time_cols = st.columns(3)
+        with time_cols[0]:
+            if st.button("+15분", use_container_width=True):
                 st.session_state.simulator.advance_time(15)
                 st.rerun()
-        
-        with col_t2:
-            if st.button("+1시간"):
+        with time_cols[1]:
+            if st.button("+1시간", use_container_width=True):
                 st.session_state.simulator.advance_time(60)
                 st.rerun()
-        
-        with col_t3:
-            if st.button("+3시간"):
+        with time_cols[2]:
+            if st.button("+3시간", use_container_width=True):
                 st.session_state.simulator.advance_time(180)
                 st.rerun()
         
         # 현재 시간 표시
         time_info = st.session_state.simulator.get_current_time_info()
-        st.info(f"현재 시간: {time_info['date']} {time_info['hour']:02d}:{time_info['minute']:02d}\n"
-                f"시간대: {time_info['time_of_day']}, {time_info['day_of_week']}")
+        st.caption(f"현재: {time_info['date']} {time_info['hour']:02d}:{time_info['minute']:02d}")
+        st.caption(f"시간대: {time_info['time_of_day']}")
     
     st.markdown("---")
     
-    # 날씨 제어
-    st.subheader("🌤️ 날씨 제어")
+    # 날씨 제어 (간소화)
+    st.subheader("날씨 제어")
     
-    col_w1, col_w2 = st.columns(2)
+    col_w1, col_w2, col_w3 = st.columns(3)
     
     with col_w1:
         weather = st.selectbox(
-            "날씨 상태",
-            ["맑음", "구름조금", "흐림", "비", "눈"],
-            index=["맑음", "구름조금", "흐림", "비", "눈"].index(
-                st.session_state.simulator.state["weather"]
-            )
+            "날씨",
+            ["맑음", "구름조금", "흐림", "비", "눈"]
         )
     
     with col_w2:
-        temperature = st.slider(
+        temperature = st.number_input(
             "기온 (°C)",
             min_value=-10,
             max_value=40,
             value=st.session_state.simulator.state["temperature"],
-            step=1
+            step=5
         )
     
-    if st.button("날씨 업데이트"):
-        st.session_state.simulator.update_weather(weather, temperature)
-        st.success(f"날씨가 업데이트되었습니다: {weather}, {temperature}°C")
+    with col_w3:
+        st.write("")  # 간격
+        st.write("")
+        if st.button("날씨 적용", use_container_width=True):
+            st.session_state.simulator.update_weather(weather, temperature)
+            st.success("날씨 업데이트")
+            st.rerun()
     
-    st.info(f"현재 날씨: {st.session_state.simulator.state['weather']}, "
-            f"{st.session_state.simulator.state['temperature']}°C")
+    # 현재 날씨
+    st.caption(f"현재 날씨: {st.session_state.simulator.state['weather']}, {st.session_state.simulator.state['temperature']}°C")
     
     st.markdown("---")
     
-    # 트리거 확인 버튼
-    st.subheader("🔔 트리거 확인")
+    # 트리거 확인
+    st.subheader("트리거 확인")
     
-    if st.button("수동으로 트리거 확인", type="primary"):
+    if st.button("지금 트리거 확인하기", type="primary", use_container_width=True):
         current_state = st.session_state.simulator.get_state()
         
         triggered = st.session_state.rag.check_triggers(
@@ -369,7 +367,7 @@ with tab2:
         )
         
         if triggered:
-            st.success(f"🔔 {len(triggered)}개의 트리거가 활성화되었습니다!")
+            st.success(f"{len(triggered)}개의 트리거 활성화!")
             
             for t in triggered:
                 activity = t["activity"]
@@ -384,142 +382,90 @@ with tab2:
                 }
                 
                 st.session_state.simulator.add_notification(notification)
-                
-                with st.expander(f"📍 {activity.get('name')}"):
-                    st.write(f"**위치**: {activity.get('location')}")
-                    st.write(f"**메시지**: {trigger.get('message')}")
-                    st.write(f"**트리거 타입**: {trigger.get('type')}")
+                st.write(f"- {activity.get('name')}: {trigger.get('message')}")
         else:
-            st.info("현재 활성화된 트리거가 없습니다")
-    
-    # 자동 트리거 확인 (주기적)
-    if current_plan and (datetime.now() - st.session_state.last_trigger_check).seconds > 5:
-        current_state = st.session_state.simulator.get_state()
-        
-        triggered = st.session_state.rag.check_triggers(
-            current_location=current_state["location"],
-            current_time=datetime.fromisoformat(current_state["datetime"]).strftime("%H:%M"),
-            current_weather=current_state["weather"]
-        )
-        
-        for t in triggered:
-            activity = t["activity"]
-            trigger = t["trigger"]
-            
-            # 중복 알림 방지
-            existing_notifications = st.session_state.simulator.state["notifications"]
-            is_duplicate = any(
-                n.get("activity", {}).get("name") == activity.get("name") and
-                not n.get("read", False)
-                for n in existing_notifications
-            )
-            
-            if not is_duplicate:
-                notification = {
-                    "type": trigger.get("type", "general"),
-                    "title": activity.get("name", "알림"),
-                    "message": trigger.get("message", "활동 알림"),
-                    "activity": activity,
-                    "trigger": trigger
-                }
-                st.session_state.simulator.add_notification(notification)
-        
-        st.session_state.last_trigger_check = datetime.now()
+            st.info("활성화된 트리거가 없습니다")
 
 
-# 탭 3: 핸드폰 화면
+# 탭 3: 핸드폰 화면 (간소화)
 with tab3:
-    st.header("📱 모바일 화면")
+    st.header("모바일 알림")
     
-    # 핸드폰 스타일 컨테이너
-    st.markdown('<div class="phone-screen">', unsafe_allow_html=True)
+    # 현재 상태 표시
+    time_info = st.session_state.simulator.get_current_time_info()
+    location = st.session_state.simulator.state["location"]
     
-    # 상태바
-    col_status1, col_status2, col_status3 = st.columns([1, 2, 1])
-    with col_status1:
-        time_info = st.session_state.simulator.get_current_time_info()
-        st.markdown(f"**{time_info['hour']:02d}:{time_info['minute']:02d}**")
-    with col_status2:
-        st.markdown(f"**{st.session_state.simulator.state['location']['name']}**")
-    with col_status3:
-        unread = len(st.session_state.simulator.get_unread_notifications())
-        if unread > 0:
-            st.markdown(
-                f'<span class="notification-badge">{unread}</span>',
-                unsafe_allow_html=True
-            )
+    st.write(f"**시간:** {time_info['hour']:02d}:{time_info['minute']:02d} | "
+             f"**위치:** {location['name']} | "
+             f"**날씨:** {st.session_state.simulator.state['weather']} {st.session_state.simulator.state['temperature']}°C")
     
     st.markdown("---")
     
     # 알림 목록
     notifications = st.session_state.simulator.state["notifications"]
+    unread_count = len([n for n in notifications if not n.get("read", False)])
+    
+    st.subheader(f"알림 ({len(notifications)}) | 읽지 않음: {unread_count}")
     
     if not notifications:
-        st.info("📭 알림이 없습니다")
+        st.info("알림이 없습니다")
     else:
-        st.subheader(f"알림 ({len(notifications)})")
-        
         for idx, notif in enumerate(reversed(notifications)):
             actual_idx = len(notifications) - 1 - idx
-            
             is_read = notif.get("read", False)
-            bg_color = "#f8f9fa" if is_read else "#ffffff"
             
-            with st.container():
-                st.markdown(
-                    f'<div class="notification-card" style="background: {bg_color};">',
-                    unsafe_allow_html=True
-                )
+            # 알림 카드
+            card_class = "notification-card" if is_read else "notification-card unread"
+            st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
+            
+            col_n1, col_n2 = st.columns([3, 1])
+            
+            with col_n1:
+                status = "[읽음]" if is_read else "[새 알림]"
+                st.markdown(f"### {status} {notif.get('title', '알림')}")
+                st.write(notif.get("message", ""))
                 
-                col_n1, col_n2 = st.columns([3, 1])
-                
-                with col_n1:
-                    icon = "🔔" if not is_read else "✅"
-                    st.markdown(f"### {icon} {notif.get('title', '알림')}")
-                    st.write(notif.get("message", ""))
-                    
-                    if "activity" in notif:
-                        activity = notif["activity"]
-                        st.caption(f"📍 {activity.get('location', '')} | "
-                                 f"⏰ {activity.get('time', '')} | "
-                                 f"⏱️ {activity.get('duration_minutes', 0)}분")
-                
-                with col_n2:
-                    if not is_read:
-                        if st.button("읽음", key=f"read_{actual_idx}"):
-                            st.session_state.simulator.mark_notification_read(actual_idx)
-                            st.rerun()
-                    
-                    if st.button("챗봇", key=f"chat_{actual_idx}"):
-                        st.session_state.chat_open = True
-                        # 컨텍스트 메시지 추가
-                        if "activity" in notif:
-                            activity = notif["activity"]
-                            context_msg = f"[알림] {activity.get('name')}: {notif.get('message')}"
-                            
-                            if not st.session_state.chat_messages or \
-                               st.session_state.chat_messages[-1].get("content") != context_msg:
-                                st.session_state.chat_messages.append({
-                                    "role": "system",
-                                    "content": context_msg
-                                })
+                if "activity" in notif:
+                    activity = notif["activity"]
+                    st.caption(f"위치: {activity.get('location', '')} | "
+                             f"시간: {activity.get('time', '')} | "
+                             f"소요: {activity.get('duration_minutes', 0)}분")
+            
+            with col_n2:
+                if not is_read:
+                    if st.button("읽음", key=f"read_{actual_idx}"):
+                        st.session_state.simulator.mark_notification_read(actual_idx)
                         st.rerun()
                 
-                st.markdown('</div>', unsafe_allow_html=True)
-                st.markdown("")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+                if st.button("챗봇", key=f"chat_{actual_idx}"):
+                    st.session_state.chat_open = True
+                    
+                    # 컨텍스트 추가
+                    if "activity" in notif:
+                        activity = notif["activity"]
+                        context_msg = f"[알림 선택] {activity.get('name')}: {notif.get('message')}"
+                        
+                        if not st.session_state.chat_messages or \
+                           st.session_state.chat_messages[-1].get("content") != context_msg:
+                            st.session_state.chat_messages.append({
+                                "role": "system",
+                                "content": context_msg
+                            })
+                    st.rerun()
+            
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.write("")  # 간격
 
 
 # 탭 4: 챗봇
 with tab4:
-    st.header("💬 AI 여행 도우미")
+    st.header("AI 여행 도우미")
     
     if not st.session_state.chat_open:
-        st.info("알림에서 '챗봇' 버튼을 눌러 대화를 시작하거나, 아래에서 직접 질문하세요.")
+        st.info("알림에서 '챗봇' 버튼을 누르거나 아래에서 직접 질문하세요.")
     
-    # 현재 상태 표시
-    with st.expander("📊 현재 상황"):
+    # 현재 상황 표시
+    with st.expander("현재 상황"):
         state = st.session_state.simulator.get_state()
         time_info = st.session_state.simulator.get_current_time_info()
         
@@ -592,4 +538,4 @@ with tab4:
 
 # 푸터
 st.markdown("---")
-st.caption("🎮 여행 시뮬레이터 MVP - 실제 위치, 시간, 날씨를 조작하여 여행을 시뮬레이션하세요")
+st.caption("여행 시뮬레이터 MVP - 실시간 시뮬레이션 기능")
