@@ -4,27 +4,34 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-dist/
-*.egg-info/
-
-# Virtual Environment
 venv/
 env/
 ENV/
+.venv
 
-# Environment Variables
+# Environment variables
 .env
+.env.local
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Streamlit
-.streamlit/secrets.toml
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Node
+node_modules/
+package-lock.json
